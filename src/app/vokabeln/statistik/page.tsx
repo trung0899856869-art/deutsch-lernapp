@@ -7,12 +7,44 @@ export default async function VokabelnStatistikPage() {
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/vokabeln" className="text-gray-400 hover:text-gray-600">
-          ← Zurück
-        </Link>
-        <h1 className="text-xl font-bold text-gray-900">Statistik</h1>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <Link href="/vokabeln" className="text-gray-400 hover:text-gray-600">
+            ← Zurück
+          </Link>
+          <h1 className="text-xl font-bold text-gray-900">Statistik</h1>
+        </div>
+        <a
+          href="/api/export/vokabeln"
+          download
+          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        >
+          ⬇ CSV
+        </a>
       </div>
+
+      {/* Retention Rate */}
+      {stats.retentionRate !== null && (
+        <>
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+            Behaltensrate
+          </h2>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
+            <div className="flex items-end gap-3">
+              <span className={`text-4xl font-bold ${stats.retentionRate >= 80 ? "text-green-600" : stats.retentionRate >= 60 ? "text-orange-500" : "text-red-500"}`}>
+                {stats.retentionRate}%
+              </span>
+              <span className="text-sm text-gray-400 pb-1">der Wiederholungen korrekt (Qualität ≥ 3)</span>
+            </div>
+            <div className="mt-3 bg-gray-100 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full transition-all ${stats.retentionRate >= 80 ? "bg-green-500" : stats.retentionRate >= 60 ? "bg-orange-400" : "bg-red-400"}`}
+                style={{ width: `${stats.retentionRate}%` }}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* SRS Status */}
       <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">

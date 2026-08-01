@@ -69,6 +69,21 @@ export const vokabelnSrs = sqliteTable("vokabeln_srs", {
   lastReviewed: integer("last_reviewed", { mode: "timestamp" }),
 });
 
+// ─── SRS Review History ──────────────────────────────────────────────────────
+
+export const srsReviews = sqliteTable(
+  "srs_reviews",
+  {
+    id: text("id").primaryKey().$defaultFn(newId),
+    vokabelId: text("vokabel_id")
+      .notNull()
+      .references(() => vokabeln.id, { onDelete: "cascade" }),
+    quality: integer("quality").notNull(),
+    reviewedAt: integer("reviewed_at", { mode: "timestamp" }).$defaultFn(now).notNull(),
+  },
+  (t) => [index("srs_reviews_vokabel_idx").on(t.vokabelId)]
+);
+
 // ─── Word Forms Index (pre-computed for text highlighting) ───────────────────
 
 export const wordForms = sqliteTable(

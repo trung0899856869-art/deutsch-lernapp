@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { vokabeln, vokabelnSrs, wordForms } from "@/lib/db/schema";
+import { vokabeln, vokabelnSrs, wordForms, srsReviews } from "@/lib/db/schema";
 import { getAllWordForms } from "@/lib/word-forms";
 import { initialSrsState } from "@/lib/srs";
-import { eq, lte, and, isNull, or } from "drizzle-orm";
+import { eq, lte, and, isNull, or, count, gte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { Wortart } from "@/lib/constants";
 
@@ -189,21 +189,29 @@ export async function getVokabelnStats() {
     if (r.dueDate && r.dueDate <= nextWeek) dueThisWeek++;
   }
 
-  return { total: rows.length, newCards, learning, mature, dueToday, dueThisWeek, byWortart };
+  const [totalReviews, goodReviews] = await Promise.all([
+    db.select({ c: count() }).from(srsReviews),
+    db.select({ c: count() }).from(srsReviews).where(gte(srsReviews.quality, 3)),
+  ]);
+  const retentionRate =
+    totalReviews[0].c > 0
+      ? Math.round((goodReviews[0].c / totalReviews[0].c) * 100)
+      : null;
+
+  return { total: rows.length, newCards, learning, mature, dueToday, dueThisWeek, byWortart, retentionRate };
 }
 
 export async function updateSrs(
   srsId: string,
-  update: {
-    interval: number;
-    repetition: number;
-    efactor: number;
-    dueDate: string;
-  }
+  update: { interval: number; repetition: number; efactor: number; dueDate: string },
+  vokabelId: string,
+  quality: number
 ) {
-  await db
-    .update(vokabelnSrs)
-    .set({ ...update, lastReviewed: new Date() })
-    .where(eq(vokabelnSrs.id, srsId));
+  await Promise.all([
+    db.update(vokabelnSrs)
+      .set({ ...update, lastReviewed: new Date() })
+      .where(eq(vokabelnSrs.id, srsId)),
+    db.insert(srsReviews).values({ vokabelId, quality }),
+  ]);
   revalidatePath("/vokabeln/ueben");
 }

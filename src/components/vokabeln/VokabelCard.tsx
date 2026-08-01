@@ -4,6 +4,7 @@ import { WORTART_COLORS, type Wortart } from "@/lib/constants";
 import { WortartBadge } from "./WortartBadge";
 import { formatNounDisplay, getAdjektivDeklinationsTable } from "@/lib/noun-parser";
 import { deleteVokabel } from "@/lib/actions/vokabeln";
+import { speakGerman } from "@/lib/tts";
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 
@@ -52,6 +53,17 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
                 : vokabel.grundform}
             </span>
             <WortartBadge wortart={wortart} />
+            <button
+              onClick={() => speakGerman(
+                wortart === "Substantiv" && vokabel.artikel
+                  ? `${vokabel.artikel} ${vokabel.grundform}`
+                  : vokabel.grundform
+              )}
+              className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
+              title="Aussprache"
+            >
+              🔊
+            </button>
           </div>
 
           {/* Substantiv: plural */}

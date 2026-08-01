@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, useRef } from "react";
 import { computeNextSrs, type Quality, type SrsState } from "@/lib/srs";
 import { updateSrs } from "@/lib/actions/vokabeln";
+import { speakGerman } from "@/lib/tts";
 import { WortartBadge } from "./WortartBadge";
 import type { Wortart } from "@/lib/constants";
 
@@ -112,7 +113,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
     const next = computeNextSrs(currentState, q);
 
     startTransition(async () => {
-      await updateSrs(card.srsId!, next);
+      await updateSrs(card.srsId!, next, card.id, q);
       setReveal(false);
       if (index + 1 >= cards.length) {
         setDone(true);
@@ -182,6 +183,13 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
               {germanSecondary && (
                 <p className="text-gray-500 text-sm">{germanSecondary}</p>
               )}
+              <button
+                onClick={() => speakGerman(germanPrimary)}
+                className="mt-3 text-gray-300 hover:text-blue-500 transition-colors text-lg"
+                title="Aussprache"
+              >
+                🔊
+              </button>
             </>
           ) : (
             <p className="text-2xl font-medium text-gray-800">{card.bedeutung}</p>
@@ -238,6 +246,13 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
                   {germanSecondary && (
                     <p className="text-sm text-gray-500 mt-1">{germanSecondary}</p>
                   )}
+                  <button
+                    onClick={() => speakGerman(germanPrimary)}
+                    className="mt-2 text-gray-300 hover:text-blue-500 transition-colors text-lg"
+                    title="Aussprache"
+                  >
+                    🔊
+                  </button>
                   {card.notes && (
                     <p className="text-sm text-gray-500 mt-1 italic">{card.notes}</p>
                   )}
