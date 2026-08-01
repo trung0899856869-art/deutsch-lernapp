@@ -26,7 +26,10 @@ interface DueCard {
   repetition?: number | null;
   efactor?: number | null;
   dueDate?: string | null;
+  lastReviewed?: Date | null;
 }
+
+type Mode = "de-vi" | "vi-de";
 
 const QUALITY_LABELS: Record<Quality, string> = {
   0: "Keine Ahnung",
@@ -55,12 +58,12 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
   const [revealed, setReveal] = useState(false);
   const [done, setDone] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
+  const [mode, setMode] = useState<Mode>("de-vi");
   const [pending, startTransition] = useTransition();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const card = cards[index];
 
-  // Start countdown on new card; pause when revealed or done
   useEffect(() => {
     if (done || revealed) {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -75,7 +78,6 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
     };
   }, [index, revealed, done]);
 
-  // Auto-skip as "Keine Ahnung" when time runs out
   useEffect(() => {
     if (timeLeft <= 0 && !revealed && !done) {
       handleQuality(0);
@@ -127,47 +129,62 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
 
   const wortart = card.wortart as Wortart;
 
-  // Ring color: green → orange → red
+  // German display form (used as front in de-vi, back in vi-de)
+  const germanPrimary =
+    wortart === "Substantiv" && card.artikel
+      ? `${card.artikel} ${card.grundform}`
+      : card.grundform;
+
+  const germanSecondary = (() => {
+    if (wortart === "Substantiv" && card.pluralForm) return `Plural: die ${card.pluralForm}`;
+    if (wortart === "Verb")
+      return [card.partizip2, card.hilfsverb].filter(Boolean).join(", ");
+    if (wortart === "Adjektiv" && (card.komparativ || card.superlativ))
+      return [card.komparativ, card.superlativ].filter(Boolean).join(" · ");
+    return null;
+  })();
+
+  // Ring color: green → orange → red as time runs out
   const ringColor =
     timeLeft > 6 ? "#22c55e" : timeLeft > 3 ? "#f97316" : "#ef4444";
   const dashOffset = RING_CIRCUMFERENCE * (1 - timeLeft / TIMER_SECONDS);
 
   return (
     <div className="max-w-lg mx-auto">
-      {/* Progress bar */}
+      {/* Progress bar + mode toggle */}
       <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
         <span>{index + 1} / {cards.length}</span>
-        <div className="flex-1 mx-4 bg-gray-200 rounded-full h-1.5">
+        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-1.5">
           <div
             className="bg-blue-600 h-1.5 rounded-full transition-all"
             style={{ width: `${((index + 1) / cards.length) * 100}%` }}
           />
         </div>
-        <WortartBadge wortart={wortart} />
+        <div className="flex items-center gap-2">
+          <WortartBadge wortart={wortart} />
+          <button
+            onClick={() => { setMode(m => m === "de-vi" ? "vi-de" : "de-vi"); setReveal(false); }}
+            className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
+            title="Richtung wechseln"
+          >
+            {mode === "de-vi" ? "DE→VI" : "VI→DE"}
+          </button>
+        </div>
       </div>
 
       {/* Card */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         {/* Front */}
         <div className="p-8 text-center">
-          <p className="text-3xl font-bold text-gray-900 mb-2">
-            {wortart === "Substantiv" && card.artikel
-              ? `${card.artikel} ${card.grundform}`
-              : card.grundform}
-          </p>
-
-          {wortart === "Substantiv" && card.pluralForm && (
-            <p className="text-gray-500 text-sm">Plural: die {card.pluralForm}</p>
-          )}
-          {wortart === "Verb" && (
-            <p className="text-gray-500 text-sm mt-1">
-              {[card.partizip2, card.hilfsverb].filter(Boolean).join(", ")}
-            </p>
-          )}
-          {wortart === "Adjektiv" && (card.komparativ || card.superlativ) && (
-            <p className="text-gray-500 text-sm mt-1">
-              {[card.komparativ, card.superlativ].filter(Boolean).join(" · ")}
-            </p>
+          {mode === "de-vi" ? (
+            <>
+              <p className="text-3xl font-bold text-gray-900 mb-2">{germanPrimary}</p>
+              {germanSecondary && (
+                <p className="text-gray-500 text-sm">{germanSecondary}</p>
+              )}
+            </>
+          ) : (
+            <p className="text-2xl font-medium text-gray-800">{card.bedeutung}</p>
           )}
         </div>
 
@@ -177,12 +194,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
             {/* Countdown ring */}
             <div className="relative w-12 h-12">
               <svg width="48" height="48" className="-rotate-90">
-                {/* Track */}
-                <circle
-                  cx="24" cy="24" r={RING_RADIUS}
-                  fill="none" stroke="#e5e7eb" strokeWidth="3"
-                />
-                {/* Progress */}
+                <circle cx="24" cy="24" r={RING_RADIUS} fill="none" stroke="#e5e7eb" strokeWidth="3" />
                 <circle
                   cx="24" cy="24" r={RING_RADIUS}
                   fill="none"
@@ -206,16 +218,30 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
               onClick={handleReveal}
               className="w-full py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
             >
-              Bedeutung anzeigen
+              {mode === "de-vi" ? "Bedeutung anzeigen" : "Deutsch anzeigen"}
             </button>
           </div>
         ) : (
           <>
             {/* Back */}
             <div className="border-t border-gray-100 bg-gray-50 px-8 py-6 text-center">
-              <p className="text-2xl font-medium text-gray-800">{card.bedeutung}</p>
-              {card.notes && (
-                <p className="text-sm text-gray-500 mt-1 italic">{card.notes}</p>
+              {mode === "de-vi" ? (
+                <>
+                  <p className="text-2xl font-medium text-gray-800">{card.bedeutung}</p>
+                  {card.notes && (
+                    <p className="text-sm text-gray-500 mt-1 italic">{card.notes}</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-gray-900">{germanPrimary}</p>
+                  {germanSecondary && (
+                    <p className="text-sm text-gray-500 mt-1">{germanSecondary}</p>
+                  )}
+                  {card.notes && (
+                    <p className="text-sm text-gray-500 mt-1 italic">{card.notes}</p>
+                  )}
+                </>
               )}
               {card.beispiel && (
                 <p className="text-sm text-gray-600 mt-2 border-l-2 border-gray-300 pl-3 text-left">

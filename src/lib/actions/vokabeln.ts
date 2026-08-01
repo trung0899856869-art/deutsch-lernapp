@@ -148,6 +148,7 @@ export async function getDueVokabeln() {
       repetition: vokabelnSrs.repetition,
       efactor: vokabelnSrs.efactor,
       dueDate: vokabelnSrs.dueDate,
+      lastReviewed: vokabelnSrs.lastReviewed,
     })
     .from(vokabeln)
     .leftJoin(vokabelnSrs, eq(vokabeln.id, vokabelnSrs.vokabelId))
@@ -157,6 +158,38 @@ export async function getDueVokabeln() {
         isNull(vokabelnSrs.dueDate)
       )
     );
+}
+
+export async function getVokabelnStats() {
+  const d = new Date();
+  const toLocalDate = (date: Date) =>
+    [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+  const today = toLocalDate(d);
+  const nextWeek = toLocalDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7));
+
+  const rows = await db
+    .select({
+      wortart: vokabeln.wortart,
+      interval: vokabelnSrs.interval,
+      lastReviewed: vokabelnSrs.lastReviewed,
+      dueDate: vokabelnSrs.dueDate,
+    })
+    .from(vokabeln)
+    .leftJoin(vokabelnSrs, eq(vokabeln.id, vokabelnSrs.vokabelId));
+
+  const byWortart: Record<string, number> = {};
+  let newCards = 0, learning = 0, mature = 0, dueToday = 0, dueThisWeek = 0;
+
+  for (const r of rows) {
+    byWortart[r.wortart] = (byWortart[r.wortart] ?? 0) + 1;
+    if (!r.lastReviewed) newCards++;
+    else if ((r.interval ?? 1) >= 21) mature++;
+    else learning++;
+    if (r.dueDate && r.dueDate <= today) dueToday++;
+    if (r.dueDate && r.dueDate <= nextWeek) dueThisWeek++;
+  }
+
+  return { total: rows.length, newCards, learning, mature, dueToday, dueThisWeek, byWortart };
 }
 
 export async function updateSrs(

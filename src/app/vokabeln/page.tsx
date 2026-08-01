@@ -9,7 +9,16 @@ export default async function VokabelnPage() {
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Vokabeln</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">Vokabeln</h1>
+          <Link
+            href="/vokabeln/statistik"
+            className="text-gray-400 hover:text-blue-600 transition-colors"
+            title="Statistik"
+          >
+            📊
+          </Link>
+        </div>
         <div className="flex gap-2">
           {alle.length > 0 && (
             <Link
