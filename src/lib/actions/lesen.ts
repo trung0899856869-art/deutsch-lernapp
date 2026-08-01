@@ -63,7 +63,11 @@ export async function deleteLesenFrage(id: string, textId: string) {
 }
 
 export async function getFragenByTextId(textId: string) {
-  return db.select().from(lesenFragen).where(eq(lesenFragen.textId, textId));
+  return db
+    .select()
+    .from(lesenFragen)
+    .where(eq(lesenFragen.textId, textId))
+    .orderBy(lesenFragen.sortOrder);
 }
 
 /**
