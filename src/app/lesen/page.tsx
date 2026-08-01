@@ -41,6 +41,11 @@ export default async function LesenPage() {
                       </span>
                     )}
                     {t.thema && <span className="text-xs text-gray-500">{t.thema}</span>}
+                    {t.fragenCount > 0 && (
+                      <span className="text-xs text-gray-400">
+                        {t.fragenCount} Frage{t.fragenCount !== 1 ? "n" : ""}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-500 mt-1 line-clamp-2">{t.inhalt}</p>
                 </div>

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { lesenTexte, lesenFragen, wordForms, vokabeln } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export interface LesenTextInput {
@@ -43,7 +43,14 @@ export async function deleteLesenText(id: string) {
 }
 
 export async function getAllLesenTexte() {
-  return db.query.lesenTexte.findMany({ orderBy: (t, { desc }) => [desc(t.createdAt)] });
+  const [texte, counts] = await Promise.all([
+    db.query.lesenTexte.findMany({ orderBy: (t, { desc }) => [desc(t.createdAt)] }),
+    db.select({ textId: lesenFragen.textId, count: count() })
+      .from(lesenFragen)
+      .groupBy(lesenFragen.textId),
+  ]);
+  const countMap = Object.fromEntries(counts.map((c) => [c.textId, c.count]));
+  return texte.map((t) => ({ ...t, fragenCount: countMap[t.id] ?? 0 }));
 }
 
 export async function getLesenTextById(id: string) {

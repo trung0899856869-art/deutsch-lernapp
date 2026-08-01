@@ -44,6 +44,9 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Wort oder Bedeutung suchen…"
+          autoCorrect="off"
+          autoCapitalize="none"
+          spellCheck={false}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
         />
         {query && (

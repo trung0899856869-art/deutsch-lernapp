@@ -131,6 +131,9 @@ export function VokabelForm({ initial }: Props) {
           name="grundform"
           required
           defaultValue={initial?.grundform ?? ""}
+          autoCorrect="off"
+          autoCapitalize="none"
+          spellCheck={false}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder={wortart === "Substantiv" ? "z.B. Wand" : wortart === "Verb" ? "z.B. sehen" : ""}
         />
@@ -196,6 +199,9 @@ export function VokabelForm({ initial }: Props) {
                 <input
                   value={shorthandInput}
                   onChange={(e) => setShorthandInput(e.target.value)}
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder='e. Wand, "e'
                 />
@@ -224,6 +230,9 @@ export function VokabelForm({ initial }: Props) {
               <input
                 name="partizip2"
                 defaultValue={initial?.partizip2 ?? ""}
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="z.B. gesehen"
               />
@@ -249,6 +258,9 @@ export function VokabelForm({ initial }: Props) {
               <input
                 name="praesensEr"
                 defaultValue={initial?.praesensEr ?? ""}
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="z.B. sieht"
               />
@@ -260,6 +272,9 @@ export function VokabelForm({ initial }: Props) {
               <input
                 name="praeteritum"
                 defaultValue={initial?.praeteritum ?? ""}
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="z.B. sah"
               />
@@ -276,6 +291,9 @@ export function VokabelForm({ initial }: Props) {
             <input
               name="komparativ"
               defaultValue={initial?.komparativ ?? ""}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="z.B. schöner"
             />
@@ -285,6 +303,9 @@ export function VokabelForm({ initial }: Props) {
             <input
               name="superlativ"
               defaultValue={initial?.superlativ ?? ""}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="z.B. am schönsten"
             />
@@ -300,6 +321,8 @@ export function VokabelForm({ initial }: Props) {
         <input
           name="beispiel"
           defaultValue={initial?.beispiel ?? ""}
+          autoCorrect="off"
+          spellCheck={false}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="z.B. Die Wand ist weiß."
         />

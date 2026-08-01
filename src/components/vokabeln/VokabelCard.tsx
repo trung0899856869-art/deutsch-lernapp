@@ -30,11 +30,11 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [showDekl, setShowDekl] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const wortart = vokabel.wortart as Wortart;
   const colors = WORTART_COLORS[wortart];
 
   function handleDelete() {
-    if (!confirm("Löschen?")) return;
     startTransition(async () => {
       await deleteVokabel(vokabel.id);
     });
@@ -124,22 +124,41 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-1 shrink-0">
-          <button
-            onClick={() => router.push(`/vokabeln/${vokabel.id}/bearbeiten`)}
-            className="p-1.5 text-gray-400 hover:text-blue-600 rounded"
-            title="Bearbeiten"
-          >
-            ✏️
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={pending}
-            className="p-1.5 text-gray-400 hover:text-red-500 rounded disabled:opacity-50"
-            title="Löschen"
-          >
-            🗑️
-          </button>
+        <div className="flex gap-1 shrink-0 items-start">
+          {confirmDelete ? (
+            <div className="flex gap-1 items-center">
+              <button
+                onClick={handleDelete}
+                disabled={pending}
+                className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+              >
+                Löschen
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+              >
+                Nein
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => router.push(`/vokabeln/${vokabel.id}/bearbeiten`)}
+                className="p-2.5 text-gray-400 hover:text-blue-600 rounded"
+                title="Bearbeiten"
+              >
+                ✏️
+              </button>
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="p-2.5 text-gray-400 hover:text-red-500 rounded"
+                title="Löschen"
+              >
+                🗑️
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -140,7 +140,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
         <div className="flex-1 mx-4 bg-gray-200 rounded-full h-1.5">
           <div
             className="bg-blue-600 h-1.5 rounded-full transition-all"
-            style={{ width: `${(index / cards.length) * 100}%` }}
+            style={{ width: `${((index + 1) / cards.length) * 100}%` }}
           />
         </div>
         <WortartBadge wortart={wortart} />
