@@ -68,9 +68,14 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
 
           {/* Substantiv: plural */}
           {wortart === "Substantiv" && vokabel.pluralForm && (
-            <p className="text-sm text-gray-500 mt-0.5">
-              Plural: die {vokabel.pluralForm}
-            </p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <p className="text-sm text-gray-500">Plural: die {vokabel.pluralForm}</p>
+              <button
+                onClick={() => speakGerman(`die ${vokabel.pluralForm}`)}
+                className="text-gray-300 hover:text-blue-500 transition-colors text-xs"
+                title="Aussprache Plural"
+              >🔊</button>
+            </div>
           )}
 
           {/* Verb: principal parts */}
@@ -104,9 +109,14 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
 
           {/* Beispiel */}
           {vokabel.beispiel && (
-            <p className="mt-1 text-sm text-gray-600 border-l-2 border-gray-200 pl-2">
-              „{vokabel.beispiel}"
-            </p>
+            <div className="mt-1 flex items-start gap-1.5 border-l-2 border-gray-200 pl-2">
+              <p className="text-sm text-gray-600 flex-1">„{vokabel.beispiel}"</p>
+              <button
+                onClick={() => speakGerman(vokabel.beispiel!)}
+                className="text-gray-300 hover:text-blue-500 transition-colors text-xs shrink-0 mt-0.5"
+                title="Aussprache Beispiel"
+              >🔊</button>
+            </div>
           )}
 
           {/* Tags */}

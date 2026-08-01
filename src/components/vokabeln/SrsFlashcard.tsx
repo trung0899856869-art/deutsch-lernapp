@@ -60,7 +60,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
   const [done, setDone] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [mode, setMode] = useState<Mode>("de-vi");
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const card = cards[index];
@@ -103,7 +103,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
   }
 
   function handleQuality(q: Quality) {
-    if (!card.srsId || pending) return;
+    if (!card.srsId) return;
     const currentState: SrsState = {
       interval: card.interval ?? 1,
       repetition: card.repetition ?? 0,
@@ -112,15 +112,14 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
     };
     const next = computeNextSrs(currentState, q);
 
-    startTransition(async () => {
-      await updateSrs(card.srsId!, next, card.id, q);
-      setReveal(false);
-      if (index + 1 >= cards.length) {
-        setDone(true);
-      } else {
-        setIndex(index + 1);
-      }
-    });
+    // Advance UI instantly, write DB in background
+    setReveal(false);
+    if (index + 1 >= cards.length) {
+      setDone(true);
+    } else {
+      setIndex(index + 1);
+    }
+    startTransition(() => { updateSrs(card.srsId!, next, card.id, q); });
   }
 
   function handleReveal() {
@@ -259,9 +258,14 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
                 </>
               )}
               {card.beispiel && (
-                <p className="text-sm text-gray-600 mt-2 border-l-2 border-gray-300 pl-3 text-left">
-                  „{card.beispiel}"
-                </p>
+                <div className="mt-2 flex items-start gap-1.5 border-l-2 border-gray-300 pl-3 text-left">
+                  <p className="text-sm text-gray-600 flex-1">„{card.beispiel}"</p>
+                  <button
+                    onClick={() => speakGerman(card.beispiel!)}
+                    className="text-gray-300 hover:text-blue-500 transition-colors text-sm shrink-0 mt-0.5"
+                    title="Aussprache"
+                  >🔊</button>
+                </div>
               )}
             </div>
 
@@ -273,7 +277,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
                   <button
                     key={q}
                     onClick={() => handleQuality(q)}
-                    disabled={pending}
+                    disabled={false}
                     className={`py-2 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 ${QUALITY_COLORS[q]}`}
                   >
                     {QUALITY_LABELS[q]}
@@ -285,7 +289,7 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
                   <button
                     key={q}
                     onClick={() => handleQuality(q)}
-                    disabled={pending}
+                    disabled={false}
                     className={`py-2 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 ${QUALITY_COLORS[q]}`}
                   >
                     {QUALITY_LABELS[q]}
