@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { getAllVokabeln, getDueVokabeln } from "@/lib/actions/vokabeln";
-import { VokabelCard } from "@/components/vokabeln/VokabelCard";
+import { VokabelListe } from "@/components/vokabeln/VokabelListe";
 import Link from "next/link";
 
 export default async function VokabelnPage() {
@@ -53,11 +53,7 @@ export default async function VokabelnPage() {
           <p>Noch keine Vokabeln. Füge deine erste Vokabel hinzu!</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {alle.map((v) => (
-            <VokabelCard key={v.id} vokabel={v} />
-          ))}
-        </div>
+        <VokabelListe vokabeln={alle} />
       )}
     </div>
   );
