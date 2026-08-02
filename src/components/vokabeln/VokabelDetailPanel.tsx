@@ -4,7 +4,7 @@ import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { WORTART_COLORS, type Wortart } from "@/lib/constants";
 import { WortartBadge } from "./WortartBadge";
-import { speakGerman } from "@/lib/tts";
+import { speakGerman, speakSequence } from "@/lib/tts";
 import { deleteVokabel } from "@/lib/actions/vokabeln";
 import { getAdjektivDeklinationsTable } from "@/lib/noun-parser";
 import { getStem } from "@/lib/word-forms/verb-forms";
@@ -207,12 +207,22 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
   );
 }
 
+function SpeakBtn({ text }: { text: string }) {
+  return (
+    <button
+      onClick={() => speakGerman(text)}
+      className="text-gray-300 hover:text-blue-500 transition-colors text-xs shrink-0"
+      title="Aussprache"
+    >🔊</button>
+  );
+}
+
 function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
   const inf = vokabel.grundform;
   const s = getStem(inf);
   const reg = { ich: s + "e", du: s + "st", er: s + "t", wir: inf, ihr: s + "t", sie: inf };
 
-  const rows: [string, string, string, string][] = [
+  const praesensRows: [string, string, string, string][] = [
     ["ich", vokabel.praesensIch || reg.ich, "wir", vokabel.praesensWir || reg.wir],
     ["du", vokabel.praesensDu || reg.du, "ihr", vokabel.praesensIhr || reg.ihr],
     ["er/sie/es", vokabel.praesensEr || reg.er, "sie/Sie", vokabel.praesensSie || reg.sie],
@@ -221,15 +231,38 @@ function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
   const hasIrreg = vokabel.praesensIch || vokabel.praesensDu || vokabel.praesensEr ||
     vokabel.praesensWir || vokabel.praesensIhr || vokabel.praesensSie;
 
+  // Build full sequence: infinitiv → perfekt → präteritum rows → präsens rows
+  function buildAllSequence(): string[] {
+    const seq: string[] = [inf];
+    if (vokabel.partizip2) seq.push(`${vokabel.hilfsverb ?? "haben"} ${vokabel.partizip2}`);
+    if (vokabel.praeteritum) {
+      const ich = vokabel.praeteritum;
+      seq.push(ich, ich + "st", ich, ich + "en", ich + "en", ich + "t");
+    }
+    praesensRows.forEach(([, f1, , f2]) => { seq.push(f1); seq.push(f2); });
+    return seq;
+  }
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      {/* Alle hören button */}
+      <button
+        onClick={() => speakSequence(buildAllSequence())}
+        className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-blue-300 text-blue-600 hover:bg-blue-50 transition-colors"
+      >
+        ▶ Alle Formen hören
+      </button>
+
       {/* Partizip II + Hilfsverb chip */}
       {vokabel.partizip2 && (
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Perfekt</p>
-          <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded inline-block">
-            {vokabel.partizip2} ({vokabel.hilfsverb ?? "haben"})
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
+              {vokabel.partizip2} ({vokabel.hilfsverb ?? "haben"})
+            </span>
+            <SpeakBtn text={`${vokabel.hilfsverb ?? "haben"} ${vokabel.partizip2}`} />
+          </div>
         </div>
       )}
 
@@ -247,15 +280,17 @@ function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
           Präsens{!hasIrreg && <span className="ml-1 text-gray-300">(regelmäßig)</span>}
         </p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          {rows.map(([p1, f1, p2, f2]) => (
+          {praesensRows.map(([p1, f1, p2, f2]) => (
             <div key={p1} className="contents">
-              <div className="flex gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="text-gray-400 w-16 shrink-0">{p1}</span>
                 <span className="font-medium text-gray-800">{f1}</span>
+                <SpeakBtn text={f1} />
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="text-gray-400 w-16 shrink-0">{p2}</span>
                 <span className="font-medium text-gray-800">{f2}</span>
+                <SpeakBtn text={f2} />
               </div>
             </div>
           ))}
@@ -275,13 +310,15 @@ function PraeteritumDisplayTable({ ich }: { ich: string }) {
     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
       {rows.map(([p1, f1, p2, f2]) => (
         <div key={p1} className="contents">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-gray-400 w-16 shrink-0">{p1}</span>
             <span className="font-medium text-gray-800">{f1}</span>
+            <SpeakBtn text={f1} />
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-gray-400 w-16 shrink-0">{p2}</span>
             <span className="font-medium text-gray-800">{f2}</span>
+            <SpeakBtn text={f2} />
           </div>
         </div>
       ))}
