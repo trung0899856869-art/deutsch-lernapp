@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { vokabeln, vokabelnSrs, wordForms, srsReviews } from "@/lib/db/schema";
 import { getAllWordForms } from "@/lib/word-forms";
 import { initialSrsState, toLocalDateString } from "@/lib/srs";
-import { eq, lte, and, isNull, or, count, gte, sql } from "drizzle-orm";
+import { eq, lte, and, isNull, or, count, gte, sql, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { Wortart } from "@/lib/constants";
 
@@ -274,6 +274,20 @@ export async function getVokabelnStats() {
       : null;
 
   return { total: rows.length, newCards, learning, mature, dueToday, dueThisWeek, byWortart, retentionRate };
+}
+
+export async function getWordFormIndexExcluding(excludeWortart: string) {
+  const rows = await db
+    .select({
+      form: wordForms.form,
+      wortart: vokabeln.wortart,
+      vokabelId: vokabeln.id,
+      grundform: vokabeln.grundform,
+    })
+    .from(wordForms)
+    .innerJoin(vokabeln, eq(wordForms.vokabelId, vokabeln.id))
+    .where(ne(vokabeln.wortart, excludeWortart));
+  return rows;
 }
 
 export async function updateSrs(

@@ -6,6 +6,7 @@ import { WORTART_COLORS, type Wortart } from "@/lib/constants";
 import { WortartBadge } from "./WortartBadge";
 import { speakGerman, speakSequence } from "@/lib/tts";
 import { deleteVokabel } from "@/lib/actions/vokabeln";
+import { BeiSpielText } from "./BeiSpielText";
 import { getAdjektivDeklinationsTables, type AdjCell } from "@/lib/noun-parser";
 import { getStem } from "@/lib/word-forms/verb-forms";
 
@@ -169,7 +170,9 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Beispiel</p>
             <div className="flex items-start gap-2 bg-gray-50 rounded-lg p-3 border-l-2 border-gray-300">
-              <p className="text-sm text-gray-700 flex-1 italic">„{vokabel.beispiel}"</p>
+              <p className="text-sm text-gray-700 flex-1 italic">
+                „<BeiSpielText text={vokabel.beispiel} excludeWortart={vokabel.wortart} />"
+              </p>
               <button
                 onClick={() => speakGerman(vokabel.beispiel!)}
                 className="text-gray-300 hover:text-blue-500 text-sm shrink-0"
