@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getWordFormIndexExcluding } from "@/lib/actions/vokabeln";
 import { buildFormIndex, highlightText } from "@/lib/text-highlighter";
 import { WORTART_COLORS, type Wortart } from "@/lib/constants";
+import { speakGerman } from "@/lib/tts";
 
 type FormRow = {
   form: string;
@@ -106,15 +107,16 @@ export function BeiSpielText({ text, excludeWortart }: { text: string; excludeWo
 
       {tooltip && (
         <span
-          className="fixed z-50 pointer-events-none"
+          className="fixed z-50"
           style={{
             left: tooltip.x,
             top: tooltip.y - 6,
             transform: "translate(-50%, -100%)",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <span className="bg-gray-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl flex flex-col gap-1 min-w-[120px] max-w-[220px]">
-            {/* Row 1: dot + display word + wortart badge */}
+          <span className="bg-gray-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl flex flex-col gap-1.5 min-w-[140px] max-w-[240px]">
+            {/* Row 1: dot + display word + wortart badge + speak button */}
             <span className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full shrink-0 ${WORTART_COLORS[tooltip.wortart].dot}`} />
               <span className="font-semibold truncate">
@@ -122,9 +124,18 @@ export function BeiSpielText({ text, excludeWortart }: { text: string; excludeWo
                   ? `${tooltip.artikel} ${tooltip.grundform}`
                   : tooltip.grundform}
               </span>
-              <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${WORTART_COLORS[tooltip.wortart].badge}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${WORTART_COLORS[tooltip.wortart].badge}`}>
                 {tooltip.wortart}
               </span>
+              <button
+                onClick={() => speakGerman(
+                  tooltip.wortart === "Substantiv" && tooltip.artikel
+                    ? `${tooltip.artikel} ${tooltip.grundform}`
+                    : tooltip.grundform
+                )}
+                className="ml-auto text-gray-400 hover:text-white transition-colors shrink-0"
+                title="Aussprache"
+              >🔊</button>
             </span>
             {/* Row 2: bedeutung */}
             <span className="text-gray-300 text-[11px] leading-snug line-clamp-2 pl-3.5">
