@@ -44,3 +44,6 @@ next-env.d.ts
 deutsch.db
 deutsch.db-shm
 deutsch.db-wal
+
+.vercel
+.env*
