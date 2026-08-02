@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { vokabeln, vokabelnSrs, wordForms, srsReviews } from "@/lib/db/schema";
 import { getAllWordForms } from "@/lib/word-forms";
-import { initialSrsState } from "@/lib/srs";
+import { initialSrsState, toLocalDateString } from "@/lib/srs";
 import { eq, lte, and, isNull, or, count, gte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { Wortart } from "@/lib/constants";
@@ -137,8 +137,7 @@ export async function getAllVokabeln() {
 }
 
 export async function getDueVokabeln() {
-  const d = new Date();
-  const today = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");
+  const today = toLocalDateString(new Date());
   return db
     .select({
       id: vokabeln.id,
@@ -183,10 +182,8 @@ export async function getDueVokabeln() {
 
 export async function getVokabelnStats() {
   const d = new Date();
-  const toLocalDate = (date: Date) =>
-    [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
-  const today = toLocalDate(d);
-  const nextWeek = toLocalDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7));
+  const today = toLocalDateString(d);
+  const nextWeek = toLocalDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7));
 
   const rows = await db
     .select({

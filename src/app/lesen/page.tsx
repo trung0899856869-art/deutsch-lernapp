@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 import { getAllLesenTexte } from "@/lib/actions/lesen";
 import Link from "next/link";
-import { deleteLesenText } from "@/lib/actions/lesen";
 
 export default async function LesenPage() {
   const texte = await getAllLesenTexte();

@@ -33,6 +33,8 @@ export const WORTART_COLORS = {
 
 export type Wortart = keyof typeof WORTART_COLORS;
 
+export const NEW_CARDS_DAILY_LIMIT = 10;
+
 export const WORTART_LIST: Wortart[] = [
   "Substantiv",
   "Verb",

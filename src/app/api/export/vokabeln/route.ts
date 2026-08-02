@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 const HEADERS = [
   "wortart", "grundform", "artikel", "bedeutung",
-  "pluralForm", "partizip2", "hilfsverb",
+  "pluralForm", "verbtyp", "praefixVerb", "partizip2", "hilfsverb",
   "praesensIch", "praesensDu", "praesensEr", "praesensWir", "praesensIhr", "praesensSie",
   "praeteritum", "komparativ", "superlativ", "beispiel", "notes", "tags",
   "interval", "repetition", "dueDate",
@@ -24,6 +24,8 @@ export async function GET() {
       artikel: vokabeln.artikel,
       bedeutung: vokabeln.bedeutung,
       pluralForm: vokabeln.pluralForm,
+      verbtyp: vokabeln.verbtyp,
+      praefixVerb: vokabeln.praefixVerb,
       partizip2: vokabeln.partizip2,
       hilfsverb: vokabeln.hilfsverb,
       praesensIch: vokabeln.praesensIch,

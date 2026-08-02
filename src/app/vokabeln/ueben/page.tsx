@@ -1,9 +1,8 @@
 export const dynamic = "force-dynamic";
 import { getDueVokabeln } from "@/lib/actions/vokabeln";
 import { SrsFlashcard } from "@/components/vokabeln/SrsFlashcard";
+import { NEW_CARDS_DAILY_LIMIT } from "@/lib/constants";
 import Link from "next/link";
-
-const NEW_CARDS_DAILY_LIMIT = 10;
 
 export default async function VokabelnUebenPage({
   searchParams,

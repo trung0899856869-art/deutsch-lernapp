@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { grammatik, grammatikSrs } from "@/lib/db/schema";
 import { eq, lte, or, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { initialSrsState, type SrsState } from "@/lib/srs";
+import { initialSrsState, toLocalDateString, type SrsState } from "@/lib/srs";
 
 export interface GrammatikInput {
   kategorie: string;
@@ -42,7 +42,7 @@ export async function getAllGrammatik() {
 }
 
 export async function getDueGrammatikCards() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = toLocalDateString(new Date());
   return db
     .select({
       id: grammatik.id,

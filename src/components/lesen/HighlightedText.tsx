@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { buildFormIndex, highlightText } from "@/lib/text-highlighter";
 import { WORTART_COLORS, type Wortart } from "@/lib/constants";
 import type { WordFormMatch } from "@/lib/text-highlighter";
@@ -20,8 +20,8 @@ interface TooltipInfo {
 export function HighlightedText({ text, formRows }: Props) {
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
 
-  const index = buildFormIndex(formRows);
-  const tokens = highlightText(text, index);
+  const index = useMemo(() => buildFormIndex(formRows), [formRows]);
+  const tokens = useMemo(() => highlightText(text, index), [text, index]);
 
   function handleClick(e: React.MouseEvent, match: WordFormMatch) {
     const rect = (e.target as HTMLElement).getBoundingClientRect();

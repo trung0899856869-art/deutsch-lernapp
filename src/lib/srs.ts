@@ -10,7 +10,7 @@ export interface SrsState {
 // Quality: 0-5 (0-2 = fail, 3-5 = pass)
 export type Quality = 0 | 1 | 2 | 3 | 4 | 5;
 
-function toLocalDateString(d: Date): string {
+export function toLocalDateString(d: Date): string {
   return [
     d.getFullYear(),
     String(d.getMonth() + 1).padStart(2, "0"),
@@ -75,7 +75,5 @@ export function initialSrsState(): Omit<SrsState, "dueDate"> & { dueDate: string
  * Returns true if the card is due for review today or earlier.
  */
 export function isDue(dueDate: string): boolean {
-  const d = new Date();
-  const today = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");
-  return dueDate <= today;
+  return dueDate <= toLocalDateString(new Date());
 }
