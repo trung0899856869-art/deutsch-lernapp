@@ -36,7 +36,7 @@ interface Props {
 }
 
 const ARTIKEL_OPTIONS = ["der", "die", "das"];
-const PLURAL_SUFFIXES = ["-", "e", '"e', "er", '"er', "en", "n", "nen", "s"];
+const PLURAL_SUFFIXES = ["-", '"', "e", '"e', "er", '"er', "en", "n", "nen", "s"];
 const HILFSVERB_OPTIONS = ["haben", "sein"];
 
 function computeRegularPraesens(inf: string) {
