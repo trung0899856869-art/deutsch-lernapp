@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { WORTART_LIST, type Wortart } from "@/lib/constants";
-import { createVokabel, updateVokabel } from "@/lib/actions/vokabeln";
+import { createVokabel, updateVokabel, checkDuplicateGrundform } from "@/lib/actions/vokabeln";
 import { parseNounShorthand, computePluralForm } from "@/lib/noun-parser";
 import { getStem } from "@/lib/word-forms/verb-forms";
 import { useRouter } from "next/navigation";
@@ -66,6 +66,21 @@ export function VokabelForm({ initial }: Props) {
   // Verbtyp
   const [verbtyp, setVerbtyp] = useState(initial?.verbtyp ?? "normal");
   const [praefixVerb, setPraefixVerb] = useState(initial?.praefixVerb ?? "");
+
+  // Duplicate detection
+  const [duplicates, setDuplicates] = useState<
+    { id: string; wortart: string; grundform: string; artikel: string | null; bedeutung: string }[]
+  >([]);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const trimmed = grundform.trim();
+      if (!trimmed) { setDuplicates([]); return; }
+      const found = await checkDuplicateGrundform(trimmed, initial?.id);
+      setDuplicates(found);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [grundform, initial?.id]);
 
   // Substantiv
   const [artikel, setArtikel] = useState(initial?.artikel ?? "der");
@@ -174,6 +189,19 @@ export function VokabelForm({ initial }: Props) {
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder={wortart === "Substantiv" ? "z.B. Wand" : wortart === "Verb" ? "z.B. sehen" : ""}
         />
+        {duplicates.length > 0 && (
+          <div className="mt-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <span className="font-semibold">⚠️ Bereits vorhanden:</span>
+            {duplicates.map((d) => (
+              <span key={d.id} className="ml-1">
+                <span className="font-medium">
+                  {d.wortart === "Substantiv" && d.artikel ? `${d.artikel} ` : ""}{d.grundform}
+                </span>
+                {" "}({d.wortart}){" — "}{d.bedeutung}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bedeutung (Vietnamese) */}

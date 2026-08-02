@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { vokabeln, vokabelnSrs, wordForms, srsReviews } from "@/lib/db/schema";
 import { getAllWordForms } from "@/lib/word-forms";
 import { initialSrsState, toLocalDateString } from "@/lib/srs";
-import { eq, lte, and, isNull, or, count, gte } from "drizzle-orm";
+import { eq, lte, and, isNull, or, count, gte, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { Wortart } from "@/lib/constants";
 
@@ -130,6 +130,22 @@ export async function updateVokabel(id: string, input: Partial<VokabelInput>) {
 export async function deleteVokabel(id: string) {
   await db.delete(vokabeln).where(eq(vokabeln.id, id));
   revalidatePath("/vokabeln");
+}
+
+export async function checkDuplicateGrundform(grundform: string, excludeId?: string) {
+  const trimmed = grundform.trim();
+  if (!trimmed) return [];
+  const rows = await db
+    .select({
+      id: vokabeln.id,
+      wortart: vokabeln.wortart,
+      grundform: vokabeln.grundform,
+      artikel: vokabeln.artikel,
+      bedeutung: vokabeln.bedeutung,
+    })
+    .from(vokabeln)
+    .where(sql`LOWER(${vokabeln.grundform}) = LOWER(${trimmed})`);
+  return excludeId ? rows.filter((r) => r.id !== excludeId) : rows;
 }
 
 export async function getAllVokabeln() {
