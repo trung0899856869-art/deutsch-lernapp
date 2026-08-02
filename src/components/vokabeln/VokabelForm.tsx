@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { WORTART_LIST, type Wortart } from "@/lib/constants";
 import { createVokabel, updateVokabel } from "@/lib/actions/vokabeln";
 import { parseNounShorthand, computePluralForm } from "@/lib/noun-parser";
+import { getStem } from "@/lib/word-forms/verb-forms";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -36,16 +37,8 @@ const ARTIKEL_OPTIONS = ["der", "die", "das"];
 const PLURAL_SUFFIXES = ["-", "e", '"e', "er", '"er', "en", "n", "nen", "s"];
 const HILFSVERB_OPTIONS = ["haben", "sein"];
 
-function getVerbStem(inf: string): string {
-  if (inf.endsWith("eln")) return inf.slice(0, -3) + "l";
-  if (inf.endsWith("ern")) return inf.slice(0, -3) + "r";
-  if (inf.endsWith("en")) return inf.slice(0, -2);
-  if (inf.endsWith("n")) return inf.slice(0, -1);
-  return inf;
-}
-
 function computeRegularPraesens(inf: string) {
-  const s = getVerbStem(inf);
+  const s = getStem(inf);
   return {
     ich: s + "e",
     du: s + "st",
@@ -392,19 +385,9 @@ interface PraeteritumTableProps {
 
 function PraeteritumTable({ praeteritumIch, onIchChange }: PraeteritumTableProps) {
   const ich = praeteritumIch;
-  const computed = {
-    ich,
-    du: ich ? ich + "st" : "",
-    er: ich,
-    wir: ich ? ich + "en" : "",
-    ihr: ich ? ich + "t" : "",
-    sie: ich ? ich + "en" : "",
-  };
-
   const preview: [string, string, string, string][] = [
-    ["ich", computed.ich, "wir", computed.wir],
-    ["du", computed.du, "ihr", computed.ihr],
-    ["er/sie/es", computed.er, "sie/Sie", computed.sie],
+    ["du", ich ? ich + "st" : "", "ihr", ich ? ich + "t" : ""],
+    ["er/sie/es", ich, "sie/Sie", ich ? ich + "en" : ""],
   ];
 
   return (
@@ -431,7 +414,7 @@ function PraeteritumTable({ praeteritumIch, onIchChange }: PraeteritumTableProps
         {/* computed preview (read-only) */}
         {ich && (
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1 border-t border-gray-200">
-            {preview.slice(1).map(([p1, f1, p2, f2]) => (
+            {preview.map(([p1, f1, p2, f2]) => (
               <div key={p1} className="contents">
                 <div className="flex gap-2 text-sm">
                   <span className="text-gray-400 w-16 shrink-0">{p1}</span>

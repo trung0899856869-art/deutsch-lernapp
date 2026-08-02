@@ -7,6 +7,7 @@ import { WortartBadge } from "./WortartBadge";
 import { speakGerman } from "@/lib/tts";
 import { deleteVokabel } from "@/lib/actions/vokabeln";
 import { getAdjektivDeklinationsTable } from "@/lib/noun-parser";
+import { getStem } from "@/lib/word-forms/verb-forms";
 
 interface Vokabel {
   id: string;
@@ -192,17 +193,9 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
   );
 }
 
-function getVerbStem(inf: string): string {
-  if (inf.endsWith("eln")) return inf.slice(0, -3) + "l";
-  if (inf.endsWith("ern")) return inf.slice(0, -3) + "r";
-  if (inf.endsWith("en")) return inf.slice(0, -2);
-  if (inf.endsWith("n")) return inf.slice(0, -1);
-  return inf;
-}
-
 function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
   const inf = vokabel.grundform;
-  const s = getVerbStem(inf);
+  const s = getStem(inf);
   const reg = { ich: s + "e", du: s + "st", er: s + "t", wir: inf, ihr: s + "t", sie: inf };
 
   const rows: [string, string, string, string][] = [

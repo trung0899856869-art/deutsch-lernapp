@@ -14,7 +14,7 @@ const PRAETERITUM_STRONG = ["", "st", "", "en", "t", "en"];
 // Präteritum endings for weak verbs
 const PRAETERITUM_WEAK = ["te", "test", "te", "ten", "tet", "ten"];
 
-function getStem(infinitive: string): string {
+export function getStem(infinitive: string): string {
   if (infinitive.endsWith("eln")) return infinitive.slice(0, -3) + "l";
   if (infinitive.endsWith("ern")) return infinitive.slice(0, -3) + "r";
   if (infinitive.endsWith("en")) return infinitive.slice(0, -2);

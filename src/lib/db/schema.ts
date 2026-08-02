@@ -124,6 +124,18 @@ export const grammatik = sqliteTable("grammatik", {
     .notNull(),
 });
 
+export const grammatikSrs = sqliteTable("grammatik_srs", {
+  id: text("id").primaryKey().$defaultFn(newId),
+  grammatikId: text("grammatik_id")
+    .notNull()
+    .references(() => grammatik.id, { onDelete: "cascade" }),
+  interval: integer("interval").default(1).notNull(),
+  repetition: integer("repetition").default(0).notNull(),
+  efactor: real("efactor").default(2.5).notNull(),
+  dueDate: text("due_date").notNull(),
+  lastReviewed: integer("last_reviewed", { mode: "timestamp" }),
+});
+
 // ─── Lesen Texte ─────────────────────────────────────────────────────────────
 
 export const lesenTexte = sqliteTable("lesen_texte", {

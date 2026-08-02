@@ -1,12 +1,11 @@
 export const dynamic = "force-dynamic";
-import { getAllGrammatik } from "@/lib/actions/grammatik";
+import { getAllGrammatik, getDueGrammatikCount } from "@/lib/actions/grammatik";
 import { GrammatikCard } from "@/components/grammatik/GrammatikCard";
 import Link from "next/link";
 
 export default async function GrammatikPage() {
-  const eintraege = await getAllGrammatik();
+  const [eintraege, dueCount] = await Promise.all([getAllGrammatik(), getDueGrammatikCount()]);
 
-  // Group by Kategorie
   const grouped = eintraege.reduce<Record<string, typeof eintraege>>((acc, e) => {
     if (!acc[e.kategorie]) acc[e.kategorie] = [];
     acc[e.kategorie].push(e);
@@ -17,12 +16,25 @@ export default async function GrammatikPage() {
     <div className="p-4 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Grammatik</h1>
-        <Link
-          href="/grammatik/neu"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-        >
-          + Neu
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/grammatik/ueben"
+            className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+          >
+            🎯 Üben
+            {dueCount > 0 && (
+              <span className="bg-white text-green-700 text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
+                {dueCount}
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/grammatik/neu"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            + Neu
+          </Link>
+        </div>
       </div>
 
       {eintraege.length === 0 ? (
