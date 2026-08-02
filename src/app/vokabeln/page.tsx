@@ -7,8 +7,8 @@ export default async function VokabelnPage() {
   const [alle, faellig] = await Promise.all([getAllVokabeln(), getDueVokabeln()]);
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex items-center justify-between mb-6 max-w-5xl">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-gray-900">Vokabeln</h1>
           <Link
@@ -41,7 +41,7 @@ export default async function VokabelnPage() {
       {faellig.length > 0 && (
         <Link
           href="/vokabeln/ueben"
-          className="block mb-6 rounded-xl bg-blue-50 border border-blue-200 p-4 hover:bg-blue-100 transition-colors"
+          className="block mb-6 max-w-5xl rounded-xl bg-blue-50 border border-blue-200 p-4 hover:bg-blue-100 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div>
