@@ -76,7 +76,7 @@ export default async function LesenTextPage({
       )}
 
       {/* Comprehension questions */}
-      <FragenSektion textId={id} fragen={fragen} />
+      <FragenSektion textId={id} fragen={fragen} inhalt={text.inhalt} niveau={text.niveau} />
     </div>
   );
 }

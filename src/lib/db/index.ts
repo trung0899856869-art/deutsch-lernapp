@@ -13,6 +13,9 @@ export const db = drizzle(client, { schema });
 const NEW_COLUMNS = [
   "ALTER TABLE vokabeln ADD COLUMN synonyme TEXT DEFAULT '[]'",
   "ALTER TABLE vokabeln ADD COLUMN antonyme TEXT DEFAULT '[]'",
+  "ALTER TABLE lesen_fragen ADD COLUMN optionen TEXT",
+  "ALTER TABLE lesen_fragen ADD COLUMN korrekt_index INTEGER",
+  "ALTER TABLE lesen_fragen ADD COLUMN ai_generated INTEGER NOT NULL DEFAULT 0",
 ];
 
 (async () => {

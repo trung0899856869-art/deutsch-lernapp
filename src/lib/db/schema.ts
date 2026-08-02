@@ -170,6 +170,10 @@ export const lesenFragen = sqliteTable("lesen_fragen", {
     .references(() => lesenTexte.id, { onDelete: "cascade" }),
   frage: text("frage").notNull(),
   antwort: text("antwort").notNull(),
+  // Multiple-choice fields (null for open-answer questions)
+  optionen: text("optionen", { mode: "json" }).$type<string[]>(),
+  korrektIndex: integer("korrekt_index"),
+  aiGenerated: integer("ai_generated").default(0).notNull(),
   sortOrder: integer("sort_order").default(0),
 });
 
