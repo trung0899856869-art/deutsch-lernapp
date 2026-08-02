@@ -83,61 +83,92 @@ export function formatNounDisplay(
   return `${artikel} ${grundform} / ${pluralArtikel} ${pluralForm}`;
 }
 
-/**
- * Generate Adjektiv declension table (4×3 = Nom/Akk/Dat/Gen × M/F/N for all 3 article types).
- * Returns a structured table for display.
- */
-export interface DeklTable {
-  headers: string[];
-  rows: { kasus: string; values: string[] }[];
+// ─── Adjektiv Deklination (3 separate tables) ────────────────────────────────
+
+export interface AdjCell {
+  article: string; // e.g. "der", "einen", "" for ohne Artikel
+  stem: string;    // adjective stem without ending
+  ending: string;  // ending to display in bold
 }
 
-// [weak, mixed, strong] × Nom/Akk/Dat/Gen
-const ADJ_ENDINGS: Record<string, [string, string, string][]> = {
-  Maskulinum: [
-    ["-e", "-er", "-er"], // Nom
-    ["-en", "-en", "-en"], // Akk
-    ["-en", "-en", "-em"], // Dat
-    ["-en", "-en", "-en"], // Gen
-  ],
-  Femininum: [
-    ["-e", "-e", "-e"],
-    ["-e", "-e", "-e"],
-    ["-en", "-en", "-er"],
-    ["-en", "-en", "-er"],
-  ],
-  Neutrum: [
-    ["-e", "-es", "-es"],
-    ["-e", "-es", "-es"],
-    ["-en", "-en", "-em"],
-    ["-en", "-en", "-en"],
-  ],
+export interface AdjDeklSection {
+  title: string;
+  subtitle: string;
+  rows: Array<{ kasus: string; mask: AdjCell; fem: AdjCell; neut: AdjCell; plural: AdjCell }>;
+}
+
+const KASUS_SHORT = ["NOM", "AKK", "DAT", "GEN"] as const;
+
+// Articles [NOM, AKK, DAT, GEN]
+const BEST_ART = {
+  mask:   ["der",  "den",   "dem",   "des"],
+  fem:    ["die",  "die",   "der",   "der"],
+  neut:   ["das",  "das",   "dem",   "des"],
+  plural: ["die",  "die",   "den",   "der"],
+};
+const UNBEST_ART = {
+  mask:   ["ein",   "einen",  "einem",  "eines"],
+  fem:    ["eine",  "eine",   "einer",  "einer"],
+  neut:   ["ein",   "ein",    "einem",  "eines"],
+  plural: ["keine", "keine",  "keinen", "keiner"],
 };
 
-const KASUS = ["Nominativ", "Akkusativ", "Dativ", "Genitiv"];
+// Adjective endings [NOM, AKK, DAT, GEN]
+const SCHWACH  = { mask: ["e","en","en","en"], fem: ["e","e","en","en"],  neut: ["e","e","en","en"],   plural: ["en","en","en","en"] };
+const GEMISCHT = { mask: ["er","en","en","en"], fem: ["e","e","en","en"], neut: ["es","es","en","en"],  plural: ["en","en","en","en"] };
+const STARK    = { mask: ["er","en","em","en"], fem: ["e","e","er","er"], neut: ["es","es","em","en"],  plural: ["e","e","en","er"] };
 
-export function getAdjektivDeklinationsTable(grundform: string): DeklTable {
-  // Stem: remove trailing -e from adjective base for stem (e.g. "müde" → "müd")
+function buildSection(
+  title: string,
+  subtitle: string,
+  articles: typeof BEST_ART | typeof UNBEST_ART | null,
+  endings: typeof SCHWACH,
+  stem: string
+): AdjDeklSection {
+  return {
+    title,
+    subtitle,
+    rows: KASUS_SHORT.map((kasus, i) => ({
+      kasus,
+      mask:   { article: articles?.mask[i]   ?? "", stem, ending: endings.mask[i] },
+      fem:    { article: articles?.fem[i]    ?? "", stem, ending: endings.fem[i] },
+      neut:   { article: articles?.neut[i]   ?? "", stem, ending: endings.neut[i] },
+      plural: { article: articles?.plural[i] ?? "", stem, ending: endings.plural[i] },
+    })),
+  };
+}
+
+export function getAdjektivDeklinationsTables(grundform: string): AdjDeklSection[] {
+  // Remove trailing -e for stem (e.g. "müde" → "müd", "groß" → "groß")
   const stem =
     grundform.toLowerCase().endsWith("e") && grundform.length > 2
       ? grundform.slice(0, -1)
       : grundform.toLowerCase();
 
-  const headers = ["Kasus", "Maskulinum (schwach/gemischt/stark)", "Femininum", "Neutrum"];
-  const rows: DeklTable["rows"] = [];
+  return [
+    buildSection("Bestimmter Artikel", "(dies-, jen-, jed-, manch-, welch-)", BEST_ART,   SCHWACH,   stem),
+    buildSection("Unbestimmter Artikel", "(kein, mein, dein, sein, ihr, unser, euer)", UNBEST_ART, GEMISCHT, stem),
+    buildSection("Ohne Artikel", "(einig-, wenig-, viel-, Zahlen)", null, STARK, stem),
+  ];
+}
 
-  for (let i = 0; i < KASUS.length; i++) {
-    const values: string[] = [];
-    for (const genus of ["Maskulinum", "Femininum", "Neutrum"]) {
-      const endings = ADJ_ENDINGS[genus][i];
-      values.push(
-        endings
-          .map((e) => stem + e.slice(1)) // remove the "-" prefix from display
-          .join(" / ")
-      );
-    }
-    rows.push({ kasus: KASUS[i], values });
-  }
+// Legacy — kept for backward compat, prefer getAdjektivDeklinationsTables
+export interface DeklTable {
+  headers: string[];
+  rows: { kasus: string; values: string[] }[];
+}
 
+export function getAdjektivDeklinationsTable(grundform: string): DeklTable {
+  const tables = getAdjektivDeklinationsTables(grundform);
+  const headers = ["Kasus", "Maskulinum", "Femininum", "Neutrum", "Plural"];
+  const rows = tables[0].rows.map((row) => ({
+    kasus: row.kasus,
+    values: [
+      row.mask.stem + row.mask.ending,
+      row.fem.stem + row.fem.ending,
+      row.neut.stem + row.neut.ending,
+      row.plural.stem + row.plural.ending,
+    ],
+  }));
   return { headers, rows };
 }

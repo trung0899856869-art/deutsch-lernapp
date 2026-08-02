@@ -6,7 +6,7 @@ import { WORTART_COLORS, type Wortart } from "@/lib/constants";
 import { WortartBadge } from "./WortartBadge";
 import { speakGerman, speakSequence } from "@/lib/tts";
 import { deleteVokabel } from "@/lib/actions/vokabeln";
-import { getAdjektivDeklinationsTable } from "@/lib/noun-parser";
+import { getAdjektivDeklinationsTables, type AdjCell } from "@/lib/noun-parser";
 import { getStem } from "@/lib/word-forms/verb-forms";
 
 interface Vokabel {
@@ -356,31 +356,48 @@ function PraeteritumDisplayTable({ ich }: { ich: string }) {
   );
 }
 
-function AdjDeklTable({ grundform }: { grundform: string }) {
-  const table = getAdjektivDeklinationsTable(grundform);
+function AdjCell({ cell }: { cell: AdjCell }) {
   return (
-    <div className="mt-2 overflow-x-auto">
-      <table className="text-xs border-collapse w-full">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="border border-gray-200 px-2 py-1 text-left font-medium">Kasus</th>
-            <th className="border border-gray-200 px-2 py-1 text-left font-medium">Mask.</th>
-            <th className="border border-gray-200 px-2 py-1 text-left font-medium">Fem.</th>
-            <th className="border border-gray-200 px-2 py-1 text-left font-medium">Neut.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {table.rows.map((row) => (
-            <tr key={row.kasus}>
-              <td className="border border-gray-200 px-2 py-1 text-gray-500">{row.kasus}</td>
-              {row.values.map((v, i) => (
-                <td key={i} className="border border-gray-200 px-2 py-1">{v}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="text-gray-400 text-xs mt-1">schwach / gemischt / stark</p>
+    <span>
+      {cell.article && <span className="text-gray-400 mr-0.5">{cell.article}</span>}
+      <span>{cell.stem}</span>
+      <span className="font-bold text-yellow-700">{cell.ending}</span>
+    </span>
+  );
+}
+
+function AdjDeklTable({ grundform }: { grundform: string }) {
+  const sections = getAdjektivDeklinationsTables(grundform);
+  return (
+    <div className="mt-2 space-y-4">
+      {sections.map((sec) => (
+        <div key={sec.title}>
+          <p className="text-xs font-semibold text-gray-700 mb-0.5">{sec.title}</p>
+          <p className="text-xs text-gray-400 mb-1">{sec.subtitle}</p>
+          <div className="overflow-x-auto">
+            <table className="text-xs border-collapse w-full">
+              <thead>
+                <tr className="bg-gray-50">
+                  {["", "Mask.", "Fem.", "Neut.", "Plural"].map((h) => (
+                    <th key={h} className="border border-gray-200 px-2 py-1 text-left font-medium text-gray-600">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sec.rows.map((row) => (
+                  <tr key={row.kasus} className="hover:bg-gray-50">
+                    <td className="border border-gray-200 px-2 py-1 text-gray-400 font-medium w-10">{row.kasus}</td>
+                    <td className="border border-gray-200 px-2 py-1"><AdjCell cell={row.mask} /></td>
+                    <td className="border border-gray-200 px-2 py-1"><AdjCell cell={row.fem} /></td>
+                    <td className="border border-gray-200 px-2 py-1"><AdjCell cell={row.neut} /></td>
+                    <td className="border border-gray-200 px-2 py-1"><AdjCell cell={row.plural} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
