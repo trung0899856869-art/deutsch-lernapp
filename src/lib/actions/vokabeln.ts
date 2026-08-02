@@ -17,6 +17,8 @@ export interface VokabelInput {
   pluralSuffix?: string;
   pluralForm?: string;
   // Verb
+  verbtyp?: string;      // "normal" | "trennbar" | "untrennbar"
+  praefixVerb?: string;  // e.g. "an" for "anrufen"
   partizip2?: string;
   hilfsverb?: string;
   praesensIch?: string;
@@ -45,6 +47,8 @@ export async function createVokabel(input: VokabelInput) {
       artikel: input.artikel,
       pluralSuffix: input.pluralSuffix,
       pluralForm: input.pluralForm,
+      verbtyp: input.verbtyp,
+      praefixVerb: input.praefixVerb,
       partizip2: input.partizip2,
       hilfsverb: input.hilfsverb,
       praesensIch: input.praesensIch,
@@ -144,6 +148,8 @@ export async function getDueVokabeln() {
       artikel: vokabeln.artikel,
       pluralSuffix: vokabeln.pluralSuffix,
       pluralForm: vokabeln.pluralForm,
+      verbtyp: vokabeln.verbtyp,
+      praefixVerb: vokabeln.praefixVerb,
       partizip2: vokabeln.partizip2,
       hilfsverb: vokabeln.hilfsverb,
       praesensIch: vokabeln.praesensIch,

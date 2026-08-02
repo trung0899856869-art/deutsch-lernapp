@@ -17,6 +17,8 @@ interface Vokabel {
   artikel?: string | null;
   pluralSuffix?: string | null;
   pluralForm?: string | null;
+  verbtyp?: string | null;
+  praefixVerb?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
   praesensIch?: string | null;

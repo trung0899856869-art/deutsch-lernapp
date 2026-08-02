@@ -25,6 +25,8 @@ export const vokabeln = sqliteTable(
     pluralForm: text("plural_form"),
 
     // Verb fields
+    verbtyp: text("verbtyp"),      // "normal" | "trennbar" | "untrennbar"
+    praefixVerb: text("praefix_verb"), // e.g. "an" for "anrufen"
     partizip2: text("partizip2"),
     hilfsverb: text("hilfsverb"),
     praesensIch: text("praesens_ich"),

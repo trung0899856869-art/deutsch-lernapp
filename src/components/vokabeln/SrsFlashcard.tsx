@@ -14,6 +14,8 @@ interface DueCard {
   bedeutung: string;
   artikel?: string | null;
   pluralForm?: string | null;
+  verbtyp?: string | null;
+  praefixVerb?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
   praesensIch?: string | null;
@@ -138,6 +140,8 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
   const germanPrimary =
     wortart === "Substantiv" && card.artikel
       ? `${card.artikel} ${card.grundform}`
+      : wortart === "Verb" && card.verbtyp === "trennbar" && card.praefixVerb
+      ? `${card.praefixVerb}|${card.grundform.slice(card.praefixVerb.length)}`
       : card.grundform;
 
   const germanSecondary = (() => {

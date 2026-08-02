@@ -16,6 +16,8 @@ interface Vokabel {
   artikel?: string | null;
   pluralSuffix?: string | null;
   pluralForm?: string | null;
+  verbtyp?: string | null;
+  praefixVerb?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
   praesensIch?: string | null;
@@ -55,9 +57,17 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
             <span className="text-lg font-semibold text-gray-900">
               {wortart === "Substantiv" && vokabel.artikel
                 ? `${vokabel.artikel} ${vokabel.grundform}`
+                : wortart === "Verb" && vokabel.verbtyp === "trennbar" && vokabel.praefixVerb
+                ? `${vokabel.praefixVerb}|${vokabel.grundform.slice(vokabel.praefixVerb.length)}`
                 : vokabel.grundform}
             </span>
             <WortartBadge wortart={wortart} />
+            {wortart === "Verb" && vokabel.verbtyp === "trennbar" && (
+              <span className="text-xs font-bold bg-orange-100 text-orange-700 rounded px-1.5 py-0.5">T</span>
+            )}
+            {wortart === "Verb" && vokabel.verbtyp === "untrennbar" && (
+              <span className="text-xs font-bold bg-purple-100 text-purple-700 rounded px-1.5 py-0.5">U</span>
+            )}
             <button
               onClick={() => speakGerman(
                 wortart === "Substantiv" && vokabel.artikel

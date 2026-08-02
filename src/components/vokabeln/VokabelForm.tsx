@@ -16,6 +16,8 @@ interface Props {
     artikel?: string | null;
     pluralSuffix?: string | null;
     pluralForm?: string | null;
+    verbtyp?: string | null;
+    praefixVerb?: string | null;
     partizip2?: string | null;
     hilfsverb?: string | null;
     praesensIch?: string | null;
@@ -61,6 +63,10 @@ export function VokabelForm({ initial }: Props) {
   // Präteritum ich-form (tracked for live preview)
   const [praeteritumIch, setPraeteritumIch] = useState(initial?.praeteritum ?? "");
 
+  // Verbtyp
+  const [verbtyp, setVerbtyp] = useState(initial?.verbtyp ?? "normal");
+  const [praefixVerb, setPraefixVerb] = useState(initial?.praefixVerb ?? "");
+
   // Substantiv
   const [artikel, setArtikel] = useState(initial?.artikel ?? "der");
   const [pluralSuffix, setPluralSuffix] = useState(initial?.pluralSuffix ?? "en");
@@ -98,6 +104,8 @@ export function VokabelForm({ initial }: Props) {
         pluralSuffix: wortart === "Substantiv" ? pSuffix : undefined,
         pluralForm:
           wortart === "Substantiv" ? computePluralForm(grundform, pSuffix) : undefined,
+        verbtyp: wortart === "Verb" ? verbtyp : undefined,
+        praefixVerb: wortart === "Verb" && verbtyp !== "normal" ? praefixVerb || undefined : undefined,
         partizip2: wortart === "Verb" ? (fd.get("partizip2") as string) || undefined : undefined,
         hilfsverb: wortart === "Verb" ? (fd.get("hilfsverb") as string) || undefined : undefined,
         praesensIch: wortart === "Verb" ? (fd.get("praesensIch") as string) || undefined : undefined,
@@ -253,6 +261,52 @@ export function VokabelForm({ initial }: Props) {
       {/* Verb-specific fields */}
       {wortart === "Verb" && (
         <div className="space-y-3">
+          {/* Verbtyp */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Verbtyp</label>
+            <div className="flex gap-2">
+              {(["normal", "trennbar", "untrennbar"] as const).map((typ) => (
+                <button
+                  key={typ}
+                  type="button"
+                  onClick={() => setVerbtyp(typ)}
+                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                    verbtyp === typ
+                      ? typ === "trennbar"
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : typ === "untrennbar"
+                        ? "bg-purple-600 text-white border-purple-600"
+                        : "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                  }`}
+                >
+                  {typ === "normal" ? "Normal" : typ === "trennbar" ? "Trennbar (T)" : "Untrennbar (U)"}
+                </button>
+              ))}
+            </div>
+            {verbtyp !== "normal" && (
+              <div className="mt-2">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Präfix <span className="text-gray-400">(z.B. „an" für „anrufen")</span>
+                </label>
+                <input
+                  value={praefixVerb}
+                  onChange={(e) => setPraefixVerb(e.target.value)}
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  placeholder="z.B. an"
+                  className="w-32 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {praefixVerb && grundform && (
+                  <span className="ml-2 text-sm text-gray-500">
+                    → {praefixVerb}|{grundform.slice(praefixVerb.length)}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Partizip II + Hilfsverb */}
           <div className="grid grid-cols-2 gap-3">
             <div>

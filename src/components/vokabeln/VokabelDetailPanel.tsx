@@ -17,6 +17,8 @@ interface Vokabel {
   artikel?: string | null;
   pluralSuffix?: string | null;
   pluralForm?: string | null;
+  verbtyp?: string | null;
+  praefixVerb?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
   praesensIch?: string | null;
@@ -59,14 +61,26 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h2 className="text-2xl font-bold text-gray-900">{displayWord}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {wortart === "Verb" && vokabel.verbtyp === "trennbar" && vokabel.praefixVerb
+                  ? `${vokabel.praefixVerb}|${vokabel.grundform.slice(vokabel.praefixVerb.length)}`
+                  : displayWord}
+              </h2>
               <button
                 onClick={() => speakGerman(displayWord)}
                 className="text-gray-300 hover:text-blue-500 transition-colors text-lg"
                 title="Aussprache"
               >🔊</button>
             </div>
-            <WortartBadge wortart={wortart} />
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <WortartBadge wortart={wortart} />
+              {wortart === "Verb" && vokabel.verbtyp === "trennbar" && (
+                <span className="text-xs font-bold bg-orange-100 text-orange-700 rounded px-1.5 py-0.5">Trennbar</span>
+              )}
+              {wortart === "Verb" && vokabel.verbtyp === "untrennbar" && (
+                <span className="text-xs font-bold bg-purple-100 text-purple-700 rounded px-1.5 py-0.5">Untrennbar</span>
+              )}
+            </div>
           </div>
 
           {/* Actions */}
