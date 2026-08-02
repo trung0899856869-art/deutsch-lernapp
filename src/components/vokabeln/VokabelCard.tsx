@@ -32,6 +32,8 @@ interface Vokabel {
   beispiel?: string | null;
   notes?: string | null;
   tags?: string[] | null;
+  synonyme?: string[] | null;
+  antonyme?: string[] | null;
 }
 
 export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {

@@ -33,6 +33,8 @@ interface Vokabel {
   beispiel?: string | null;
   notes?: string | null;
   tags?: string[] | null;
+  synonyme?: string[] | null;
+  antonyme?: string[] | null;
 }
 
 export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
@@ -184,6 +186,34 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
               {vokabel.tags.map((tag) => (
                 <span key={tag} className="text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-1">
                   {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Synonyme */}
+        {vokabel.synonyme && vokabel.synonyme.length > 0 && (
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Synonyme</p>
+            <div className="flex flex-wrap gap-1.5">
+              {vokabel.synonyme.map((s) => (
+                <span key={s} className="text-xs bg-green-50 text-green-700 border border-green-200 rounded-full px-2.5 py-1">
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Antonyme */}
+        {vokabel.antonyme && vokabel.antonyme.length > 0 && (
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Antonyme</p>
+            <div className="flex flex-wrap gap-1.5">
+              {vokabel.antonyme.map((a) => (
+                <span key={a} className="text-xs bg-red-50 text-red-700 border border-red-200 rounded-full px-2.5 py-1">
+                  {a}
                 </span>
               ))}
             </div>

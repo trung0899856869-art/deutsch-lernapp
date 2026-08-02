@@ -35,6 +35,34 @@ export interface VokabelInput {
   beispiel?: string;
   notes?: string;
   tags?: string[];
+  synonyme?: string[];
+  antonyme?: string[];
+}
+
+// Propagate reverse synonym/antonym links to existing words
+async function syncReverseLinks(newId: string, newGrundform: string, synonyme: string[], antonyme: string[]) {
+  for (const syn of synonyme) {
+    const matches = await db.select({ id: vokabeln.id, synonyme: vokabeln.synonyme }).from(vokabeln)
+      .where(sql`LOWER(${vokabeln.grundform}) = LOWER(${syn})`);
+    for (const match of matches) {
+      if (match.id === newId) continue;
+      const current = (match.synonyme ?? []) as string[];
+      if (!current.some((s) => s.toLowerCase() === newGrundform.toLowerCase())) {
+        await db.update(vokabeln).set({ synonyme: [...current, newGrundform] }).where(eq(vokabeln.id, match.id));
+      }
+    }
+  }
+  for (const ant of antonyme) {
+    const matches = await db.select({ id: vokabeln.id, antonyme: vokabeln.antonyme }).from(vokabeln)
+      .where(sql`LOWER(${vokabeln.grundform}) = LOWER(${ant})`);
+    for (const match of matches) {
+      if (match.id === newId) continue;
+      const current = (match.antonyme ?? []) as string[];
+      if (!current.some((a) => a.toLowerCase() === newGrundform.toLowerCase())) {
+        await db.update(vokabeln).set({ antonyme: [...current, newGrundform] }).where(eq(vokabeln.id, match.id));
+      }
+    }
+  }
 }
 
 export async function createVokabel(input: VokabelInput) {
@@ -63,6 +91,8 @@ export async function createVokabel(input: VokabelInput) {
       beispiel: input.beispiel,
       notes: input.notes,
       tags: input.tags ?? [],
+      synonyme: input.synonyme ?? [],
+      antonyme: input.antonyme ?? [],
     })
     .returning();
 
@@ -91,6 +121,8 @@ export async function createVokabel(input: VokabelInput) {
       forms.map((form) => ({ vokabelId: entry.id, form }))
     );
   }
+
+  await syncReverseLinks(entry.id, entry.grundform, input.synonyme ?? [], input.antonyme ?? []);
 
   revalidatePath("/vokabeln");
   return entry;
@@ -123,6 +155,8 @@ export async function updateVokabel(id: string, input: Partial<VokabelInput>) {
     );
   }
 
+  await syncReverseLinks(id, entry.grundform, (input.synonyme ?? []), (input.antonyme ?? []));
+
   revalidatePath("/vokabeln");
   return entry;
 }
@@ -130,6 +164,13 @@ export async function updateVokabel(id: string, input: Partial<VokabelInput>) {
 export async function deleteVokabel(id: string) {
   await db.delete(vokabeln).where(eq(vokabeln.id, id));
   revalidatePath("/vokabeln");
+}
+
+export async function getVokabelGrundformenList() {
+  return db
+    .select({ id: vokabeln.id, grundform: vokabeln.grundform, wortart: vokabeln.wortart, artikel: vokabeln.artikel })
+    .from(vokabeln)
+    .orderBy(vokabeln.grundform);
 }
 
 export async function checkDuplicateGrundform(grundform: string, excludeId?: string) {

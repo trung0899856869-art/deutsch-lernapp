@@ -7,6 +7,7 @@ const HEADERS = [
   "pluralForm", "verbtyp", "praefixVerb", "partizip2", "hilfsverb",
   "praesensIch", "praesensDu", "praesensEr", "praesensWir", "praesensIhr", "praesensSie",
   "praeteritum", "komparativ", "superlativ", "beispiel", "notes", "tags",
+  "synonyme", "antonyme",
   "interval", "repetition", "dueDate",
 ] as const;
 
@@ -40,6 +41,8 @@ export async function GET() {
       beispiel: vokabeln.beispiel,
       notes: vokabeln.notes,
       tags: vokabeln.tags,
+      synonyme: vokabeln.synonyme,
+      antonyme: vokabeln.antonyme,
       interval: vokabelnSrs.interval,
       repetition: vokabelnSrs.repetition,
       dueDate: vokabelnSrs.dueDate,

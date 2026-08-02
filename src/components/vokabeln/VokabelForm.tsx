@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { WORTART_LIST, type Wortart } from "@/lib/constants";
-import { createVokabel, updateVokabel, checkDuplicateGrundform } from "@/lib/actions/vokabeln";
+import { createVokabel, updateVokabel, checkDuplicateGrundform, getVokabelGrundformenList } from "@/lib/actions/vokabeln";
 import { parseNounShorthand, computePluralForm } from "@/lib/noun-parser";
 import { getStem } from "@/lib/word-forms/verb-forms";
 import { useRouter } from "next/navigation";
@@ -32,6 +32,8 @@ interface Props {
     beispiel?: string | null;
     notes?: string | null;
     tags?: string[] | null;
+    synonyme?: string[] | null;
+    antonyme?: string[] | null;
   };
 }
 
@@ -81,6 +83,17 @@ export function VokabelForm({ initial }: Props) {
     }, 400);
     return () => clearTimeout(timer);
   }, [grundform, initial?.id]);
+
+  // Synonyme / Antonyme
+  const [synonyme, setSynonyme] = useState<string[]>(initial?.synonyme ?? []);
+  const [antonyme, setAntonyme] = useState<string[]>(initial?.antonyme ?? []);
+  const [grundformenList, setGrundformenList] = useState<string[]>([]);
+
+  useEffect(() => {
+    getVokabelGrundformenList().then((list) =>
+      setGrundformenList(list.map((v) => v.grundform))
+    );
+  }, []);
 
   // Substantiv
   const [artikel, setArtikel] = useState(initial?.artikel ?? "der");
@@ -139,6 +152,8 @@ export function VokabelForm({ initial }: Props) {
         tags: (fd.get("tags") as string)
           ? (fd.get("tags") as string).split(",").map((t) => t.trim()).filter(Boolean)
           : [],
+        synonyme,
+        antonyme,
       };
 
       if (initial?.id) {
@@ -465,6 +480,36 @@ export function VokabelForm({ initial }: Props) {
         />
       </div>
 
+      {/* Synonyme */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Synonyme <span className="text-gray-400 font-normal">(sinnverwandte Wörter)</span>
+        </label>
+        <TagInput
+          listId="syn-options"
+          value={synonyme}
+          onChange={setSynonyme}
+          options={grundformenList.filter((g) => g !== grundform)}
+          placeholder="Wort eingeben + Enter"
+          chipColor="green"
+        />
+      </div>
+
+      {/* Antonyme */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Antonyme <span className="text-gray-400 font-normal">(Gegenwörter)</span>
+        </label>
+        <TagInput
+          listId="ant-options"
+          value={antonyme}
+          onChange={setAntonyme}
+          options={grundformenList.filter((g) => g !== grundform)}
+          placeholder="Wort eingeben + Enter"
+          chipColor="red"
+        />
+      </div>
+
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
@@ -482,6 +527,85 @@ export function VokabelForm({ initial }: Props) {
         </button>
       </div>
     </form>
+  );
+}
+
+// ─── TagInput ─────────────────────────────────────────────────────────────────
+
+const CHIP_STYLES = {
+  green: "bg-green-50 text-green-700 border-green-200",
+  red: "bg-red-50 text-red-700 border-red-200",
+};
+
+function TagInput({
+  listId,
+  value,
+  onChange,
+  options,
+  placeholder,
+  chipColor,
+}: {
+  listId: string;
+  value: string[];
+  onChange: (v: string[]) => void;
+  options: string[];
+  placeholder: string;
+  chipColor: "green" | "red";
+}) {
+  const [input, setInput] = useState("");
+
+  function addTag(raw: string) {
+    const tag = raw.trim();
+    if (!tag || value.some((v) => v.toLowerCase() === tag.toLowerCase())) return;
+    onChange([...value, tag]);
+    setInput("");
+  }
+
+  function removeTag(tag: string) {
+    onChange(value.filter((v) => v !== tag));
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag(input);
+    } else if (e.key === "Backspace" && !input && value.length > 0) {
+      removeTag(value[value.length - 1]);
+    }
+  }
+
+  const chipCls = `text-xs border rounded-full px-2 py-0.5 flex items-center gap-1 ${CHIP_STYLES[chipColor]}`;
+
+  return (
+    <div className="flex flex-wrap gap-1.5 rounded-md border border-gray-300 px-3 py-2 min-h-[38px] focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+      {value.map((tag) => (
+        <span key={tag} className={chipCls}>
+          {tag}
+          <button
+            type="button"
+            onClick={() => removeTag(tag)}
+            className="hover:opacity-70 leading-none"
+          >×</button>
+        </span>
+      ))}
+      <input
+        list={listId}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => { if (input) addTag(input); }}
+        placeholder={value.length === 0 ? placeholder : ""}
+        className="flex-1 min-w-[120px] outline-none text-sm bg-transparent"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
+      />
+      <datalist id={listId}>
+        {options
+          .filter((o) => !value.includes(o))
+          .map((o) => <option key={o} value={o} />)}
+      </datalist>
+    </div>
   );
 }
 

@@ -33,6 +33,8 @@ interface Vokabel {
   beispiel?: string | null;
   notes?: string | null;
   tags?: string[] | null;
+  synonyme?: string[] | null;
+  antonyme?: string[] | null;
 }
 
 const TAB_COLORS: Record<Wortart, string> = {

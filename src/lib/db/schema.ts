@@ -45,6 +45,8 @@ export const vokabeln = sqliteTable(
     beispiel: text("beispiel"),
     notes: text("notes"),
     tags: text("tags", { mode: "json" }).$type<string[]>().default([]),
+    synonyme: text("synonyme", { mode: "json" }).$type<string[]>().default([]),
+    antonyme: text("antonyme", { mode: "json" }).$type<string[]>().default([]),
     extraFields: text("extra_fields", { mode: "json" })
       .$type<Record<string, unknown>>()
       .default({}),
