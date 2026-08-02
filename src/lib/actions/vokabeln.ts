@@ -283,6 +283,8 @@ export async function getWordFormIndexExcluding(excludeWortart: string) {
       wortart: vokabeln.wortart,
       vokabelId: vokabeln.id,
       grundform: vokabeln.grundform,
+      bedeutung: vokabeln.bedeutung,
+      artikel: vokabeln.artikel,
     })
     .from(wordForms)
     .innerJoin(vokabeln, eq(wordForms.vokabelId, vokabeln.id))
