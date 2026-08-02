@@ -216,22 +216,21 @@ function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
 
   return (
     <div className="space-y-2">
-      {/* Partizip + Hilfsverb + Präteritum chips */}
-      {(vokabel.partizip2 || vokabel.praeteritum) && (
+      {/* Partizip II + Hilfsverb chip */}
+      {vokabel.partizip2 && (
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Perfekt / Präteritum</p>
-          <div className="flex flex-wrap gap-2">
-            {vokabel.partizip2 && (
-              <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
-                {vokabel.partizip2} ({vokabel.hilfsverb ?? "haben"})
-              </span>
-            )}
-            {vokabel.praeteritum && (
-              <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
-                ich {vokabel.praeteritum}
-              </span>
-            )}
-          </div>
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Perfekt</p>
+          <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded inline-block">
+            {vokabel.partizip2} ({vokabel.hilfsverb ?? "haben"})
+          </span>
+        </div>
+      )}
+
+      {/* Präteritum table */}
+      {vokabel.praeteritum && (
+        <div>
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Präteritum</p>
+          <PraeteritumDisplayTable ich={vokabel.praeteritum} />
         </div>
       )}
 
@@ -255,6 +254,30 @@ function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function PraeteritumDisplayTable({ ich }: { ich: string }) {
+  const rows: [string, string, string, string][] = [
+    ["ich", ich, "wir", ich + "en"],
+    ["du", ich + "st", "ihr", ich + "t"],
+    ["er/sie/es", ich, "sie/Sie", ich + "en"],
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+      {rows.map(([p1, f1, p2, f2]) => (
+        <div key={p1} className="contents">
+          <div className="flex gap-2">
+            <span className="text-gray-400 w-16 shrink-0">{p1}</span>
+            <span className="font-medium text-gray-800">{f1}</span>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-gray-400 w-16 shrink-0">{p2}</span>
+            <span className="font-medium text-gray-800">{f2}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

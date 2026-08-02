@@ -65,6 +65,8 @@ export function VokabelForm({ initial }: Props) {
 
   // Grundform (tracked for verb conjugation preview)
   const [grundform, setGrundform] = useState(initial?.grundform ?? "");
+  // Präteritum ich-form (tracked for live preview)
+  const [praeteritumIch, setPraeteritumIch] = useState(initial?.praeteritum ?? "");
 
   // Substantiv
   const [artikel, setArtikel] = useState(initial?.artikel ?? "der");
@@ -290,20 +292,7 @@ export function VokabelForm({ initial }: Props) {
           <PraesensTable grundform={grundform} initial={initial} />
 
           {/* Präteritum */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Präteritum (ich)
-            </label>
-            <input
-              name="praeteritum"
-              defaultValue={initial?.praeteritum ?? ""}
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="z.B. sah"
-            />
-          </div>
+          <PraeteritumTable praeteritumIch={praeteritumIch} onIchChange={setPraeteritumIch} />
         </div>
       )}
 
@@ -393,6 +382,71 @@ export function VokabelForm({ initial }: Props) {
         </button>
       </div>
     </form>
+  );
+}
+
+interface PraeteritumTableProps {
+  praeteritumIch: string;
+  onIchChange: (v: string) => void;
+}
+
+function PraeteritumTable({ praeteritumIch, onIchChange }: PraeteritumTableProps) {
+  const ich = praeteritumIch;
+  const computed = {
+    ich,
+    du: ich ? ich + "st" : "",
+    er: ich,
+    wir: ich ? ich + "en" : "",
+    ihr: ich ? ich + "t" : "",
+    sie: ich ? ich + "en" : "",
+  };
+
+  const preview: [string, string, string, string][] = [
+    ["ich", computed.ich, "wir", computed.wir],
+    ["du", computed.du, "ihr", computed.ihr],
+    ["er/sie/es", computed.er, "sie/Sie", computed.sie],
+  ];
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        Präteritum{" "}
+        <span className="text-xs font-normal text-gray-400">(restliche Formen auto)</span>
+      </label>
+      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 space-y-2">
+        {/* ich input */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500 w-16 shrink-0">ich</span>
+          <input
+            name="praeteritum"
+            value={praeteritumIch}
+            onChange={(e) => onIchChange(e.target.value)}
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            placeholder="z.B. sah"
+            className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        {/* computed preview (read-only) */}
+        {ich && (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1 border-t border-gray-200">
+            {preview.slice(1).map(([p1, f1, p2, f2]) => (
+              <div key={p1} className="contents">
+                <div className="flex gap-2 text-sm">
+                  <span className="text-gray-400 w-16 shrink-0">{p1}</span>
+                  <span className="text-gray-600">{f1}</span>
+                </div>
+                <div className="flex gap-2 text-sm">
+                  <span className="text-gray-400 w-16 shrink-0">{p2}</span>
+                  <span className="text-gray-600">{f2}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
