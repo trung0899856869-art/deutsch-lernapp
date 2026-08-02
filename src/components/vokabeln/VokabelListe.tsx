@@ -19,7 +19,12 @@ interface Vokabel {
   pluralForm?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
+  praesensIch?: string | null;
+  praesensDu?: string | null;
   praesensEr?: string | null;
+  praesensWir?: string | null;
+  praesensIhr?: string | null;
+  praesensSie?: string | null;
   praeteritum?: string | null;
   komparativ?: string | null;
   superlativ?: string | null;
@@ -356,11 +361,27 @@ const CompactRow = memo(function CompactRow({
       {mobileExpanded && (
         <div className="md:hidden px-4 pb-3 text-sm bg-gray-50 border-t border-gray-100">
           <p className="text-gray-500 mb-1">{vokabel.bedeutung}</p>
-          {vokabel.pluralForm && <p className="text-xs text-gray-400">Pl: die {vokabel.pluralForm}</p>}
-          {vokabel.partizip2 && (
-            <p className="text-xs text-gray-400">
-              {[vokabel.partizip2, vokabel.hilfsverb, vokabel.praesensEr && `er: ${vokabel.praesensEr}`].filter(Boolean).join(" · ")}
-            </p>
+          {wortart === "Substantiv" && vokabel.pluralForm && (
+            <p className="text-xs text-gray-400">Pl: die {vokabel.pluralForm}</p>
+          )}
+          {wortart === "Verb" && (
+            <div className="text-xs text-gray-400 space-y-0.5 mt-0.5">
+              {vokabel.partizip2 && (
+                <p>{vokabel.partizip2} ({vokabel.hilfsverb ?? "haben"}){vokabel.praeteritum ? ` · ich ${vokabel.praeteritum}` : ""}</p>
+              )}
+              {(vokabel.praesensEr || vokabel.praesensIch) && (
+                <p>
+                  {[
+                    vokabel.praesensIch && `ich ${vokabel.praesensIch}`,
+                    vokabel.praesensDu && `du ${vokabel.praesensDu}`,
+                    vokabel.praesensEr && `er ${vokabel.praesensEr}`,
+                  ].filter(Boolean).join(" · ")}
+                </p>
+              )}
+            </div>
+          )}
+          {wortart === "Adjektiv" && (vokabel.komparativ || vokabel.superlativ) && (
+            <p className="text-xs text-gray-400">{[vokabel.komparativ, vokabel.superlativ].filter(Boolean).join(" · ")}</p>
           )}
           {vokabel.beispiel && <p className="text-xs text-gray-500 mt-1 italic">„{vokabel.beispiel}"</p>}
           {vokabel.tags && vokabel.tags.length > 0 && (

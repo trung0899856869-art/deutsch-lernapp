@@ -16,7 +16,12 @@ interface DueCard {
   pluralForm?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
+  praesensIch?: string | null;
+  praesensDu?: string | null;
   praesensEr?: string | null;
+  praesensWir?: string | null;
+  praesensIhr?: string | null;
+  praesensSie?: string | null;
   praeteritum?: string | null;
   komparativ?: string | null;
   superlativ?: string | null;
@@ -137,8 +142,15 @@ export function SrsFlashcard({ cards }: { cards: DueCard[] }) {
 
   const germanSecondary = (() => {
     if (wortart === "Substantiv" && card.pluralForm) return `Plural: die ${card.pluralForm}`;
-    if (wortart === "Verb")
-      return [card.partizip2, card.hilfsverb].filter(Boolean).join(", ");
+    if (wortart === "Verb") {
+      // Show drei Stammformen: infinitiv – praeteritum – partizip2 (haben/sein)
+      const parts = [
+        card.praeteritum && `ich ${card.praeteritum}`,
+        card.partizip2 && `${card.partizip2} (${card.hilfsverb ?? "haben"})`,
+        card.praesensEr && `er ${card.praesensEr}`,
+      ].filter(Boolean);
+      return parts.length ? parts.join(" · ") : null;
+    }
     if (wortart === "Adjektiv" && (card.komparativ || card.superlativ))
       return [card.komparativ, card.superlativ].filter(Boolean).join(" · ");
     return null;

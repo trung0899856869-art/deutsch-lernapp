@@ -18,7 +18,12 @@ interface Vokabel {
   pluralForm?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
+  praesensIch?: string | null;
+  praesensDu?: string | null;
   praesensEr?: string | null;
+  praesensWir?: string | null;
+  praesensIhr?: string | null;
+  praesensSie?: string | null;
   praeteritum?: string | null;
   komparativ?: string | null;
   superlativ?: string | null;
@@ -78,18 +83,28 @@ export function VokabelCard({ vokabel }: { vokabel: Vokabel }) {
             </div>
           )}
 
-          {/* Verb: principal parts */}
+          {/* Verb: principal parts summary */}
           {wortart === "Verb" && (
-            <p className="text-sm text-gray-500 mt-0.5">
-              {[
-                vokabel.partizip2,
-                vokabel.hilfsverb,
-                vokabel.praesensEr && `er: ${vokabel.praesensEr}`,
-                vokabel.praeteritum && `Prät: ${vokabel.praeteritum}`,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
+            <div className="mt-0.5 space-y-0.5">
+              {(vokabel.partizip2 || vokabel.praeteritum) && (
+                <p className="text-sm text-gray-500">
+                  {[
+                    vokabel.partizip2 && `${vokabel.partizip2} (${vokabel.hilfsverb ?? "haben"})`,
+                    vokabel.praeteritum && `ich ${vokabel.praeteritum}`,
+                  ].filter(Boolean).join(" · ")}
+                </p>
+              )}
+              {(vokabel.praesensIch || vokabel.praesensDu || vokabel.praesensEr) && (
+                <p className="text-xs text-gray-400">
+                  Präs:{" "}
+                  {[
+                    vokabel.praesensIch && `ich ${vokabel.praesensIch}`,
+                    vokabel.praesensDu && `du ${vokabel.praesensDu}`,
+                    vokabel.praesensEr && `er ${vokabel.praesensEr}`,
+                  ].filter(Boolean).join(" · ")}
+                </p>
+              )}
+            </div>
           )}
 
           {/* Adjektiv: komparativ/superlativ */}
