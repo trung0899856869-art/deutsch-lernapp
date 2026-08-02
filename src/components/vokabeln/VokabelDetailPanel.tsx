@@ -18,7 +18,12 @@ interface Vokabel {
   pluralForm?: string | null;
   partizip2?: string | null;
   hilfsverb?: string | null;
+  praesensIch?: string | null;
+  praesensDu?: string | null;
   praesensEr?: string | null;
+  praesensWir?: string | null;
+  praesensIhr?: string | null;
+  praesensSie?: string | null;
   praeteritum?: string | null;
   komparativ?: string | null;
   superlativ?: string | null;
@@ -110,27 +115,8 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
           </div>
         )}
 
-        {wortart === "Verb" && (vokabel.partizip2 || vokabel.praesensEr || vokabel.praeteritum) && (
-          <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Verbformen</p>
-            <div className="flex flex-wrap gap-3">
-              {vokabel.partizip2 && (
-                <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
-                  {vokabel.partizip2} {vokabel.hilfsverb && `(${vokabel.hilfsverb})`}
-                </span>
-              )}
-              {vokabel.praesensEr && (
-                <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
-                  er {vokabel.praesensEr}
-                </span>
-              )}
-              {vokabel.praeteritum && (
-                <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
-                  Prät. {vokabel.praeteritum}
-                </span>
-              )}
-            </div>
-          </div>
+        {wortart === "Verb" && (
+          <VerbFormenPanel vokabel={vokabel} />
         )}
 
         {wortart === "Adjektiv" && (vokabel.komparativ || vokabel.superlativ) && (
@@ -201,6 +187,73 @@ export function VokabelDetailPanel({ vokabel }: { vokabel: Vokabel }) {
             {showDekl && <AdjDeklTable grundform={vokabel.grundform} />}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function getVerbStem(inf: string): string {
+  if (inf.endsWith("eln")) return inf.slice(0, -3) + "l";
+  if (inf.endsWith("ern")) return inf.slice(0, -3) + "r";
+  if (inf.endsWith("en")) return inf.slice(0, -2);
+  if (inf.endsWith("n")) return inf.slice(0, -1);
+  return inf;
+}
+
+function VerbFormenPanel({ vokabel }: { vokabel: Vokabel }) {
+  const inf = vokabel.grundform;
+  const s = getVerbStem(inf);
+  const reg = { ich: s + "e", du: s + "st", er: s + "t", wir: inf, ihr: s + "t", sie: inf };
+
+  const rows: [string, string, string, string][] = [
+    ["ich", vokabel.praesensIch || reg.ich, "wir", vokabel.praesensWir || reg.wir],
+    ["du", vokabel.praesensDu || reg.du, "ihr", vokabel.praesensIhr || reg.ihr],
+    ["er/sie/es", vokabel.praesensEr || reg.er, "sie/Sie", vokabel.praesensSie || reg.sie],
+  ];
+
+  const hasIrreg = vokabel.praesensIch || vokabel.praesensDu || vokabel.praesensEr ||
+    vokabel.praesensWir || vokabel.praesensIhr || vokabel.praesensSie;
+
+  return (
+    <div className="space-y-2">
+      {/* Partizip + Hilfsverb + Präteritum chips */}
+      {(vokabel.partizip2 || vokabel.praeteritum) && (
+        <div>
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Perfekt / Präteritum</p>
+          <div className="flex flex-wrap gap-2">
+            {vokabel.partizip2 && (
+              <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
+                {vokabel.partizip2} ({vokabel.hilfsverb ?? "haben"})
+              </span>
+            )}
+            {vokabel.praeteritum && (
+              <span className="text-sm bg-red-50 text-red-700 px-2 py-1 rounded">
+                ich {vokabel.praeteritum}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Präsens table */}
+      <div>
+        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
+          Präsens{!hasIrreg && <span className="ml-1 text-gray-300">(regelmäßig)</span>}
+        </p>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+          {rows.map(([p1, f1, p2, f2]) => (
+            <div key={p1} className="contents">
+              <div className="flex gap-2">
+                <span className="text-gray-400 w-16 shrink-0">{p1}</span>
+                <span className="font-medium text-gray-800">{f1}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-gray-400 w-16 shrink-0">{p2}</span>
+                <span className="font-medium text-gray-800">{f2}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

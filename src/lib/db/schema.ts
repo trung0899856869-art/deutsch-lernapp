@@ -27,7 +27,12 @@ export const vokabeln = sqliteTable(
     // Verb fields
     partizip2: text("partizip2"),
     hilfsverb: text("hilfsverb"),
+    praesensIch: text("praesens_ich"),
+    praesensDu: text("praesens_du"),
     praesensEr: text("praesens_er"),
+    praesensWir: text("praesens_wir"),
+    praesensIhr: text("praesens_ihr"),
+    praesensSie: text("praesens_sie"),
     praeteritum: text("praeteritum"),
 
     // Adjektiv/Adverb fields

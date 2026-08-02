@@ -19,7 +19,12 @@ export interface VokabelInput {
   // Verb
   partizip2?: string;
   hilfsverb?: string;
+  praesensIch?: string;
+  praesensDu?: string;
   praesensEr?: string;
+  praesensWir?: string;
+  praesensIhr?: string;
+  praesensSie?: string;
   praeteritum?: string;
   // Adjektiv
   komparativ?: string;
@@ -42,7 +47,12 @@ export async function createVokabel(input: VokabelInput) {
       pluralForm: input.pluralForm,
       partizip2: input.partizip2,
       hilfsverb: input.hilfsverb,
+      praesensIch: input.praesensIch,
+      praesensDu: input.praesensDu,
       praesensEr: input.praesensEr,
+      praesensWir: input.praesensWir,
+      praesensIhr: input.praesensIhr,
+      praesensSie: input.praesensSie,
       praeteritum: input.praeteritum,
       komparativ: input.komparativ,
       superlativ: input.superlativ,
@@ -136,7 +146,12 @@ export async function getDueVokabeln() {
       pluralForm: vokabeln.pluralForm,
       partizip2: vokabeln.partizip2,
       hilfsverb: vokabeln.hilfsverb,
+      praesensIch: vokabeln.praesensIch,
+      praesensDu: vokabeln.praesensDu,
       praesensEr: vokabeln.praesensEr,
+      praesensWir: vokabeln.praesensWir,
+      praesensIhr: vokabeln.praesensIhr,
+      praesensSie: vokabeln.praesensSie,
       praeteritum: vokabeln.praeteritum,
       komparativ: vokabeln.komparativ,
       superlativ: vokabeln.superlativ,

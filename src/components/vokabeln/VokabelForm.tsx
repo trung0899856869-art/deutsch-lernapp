@@ -17,7 +17,12 @@ interface Props {
     pluralForm?: string | null;
     partizip2?: string | null;
     hilfsverb?: string | null;
+    praesensIch?: string | null;
+    praesensDu?: string | null;
     praesensEr?: string | null;
+    praesensWir?: string | null;
+    praesensIhr?: string | null;
+    praesensSie?: string | null;
     praeteritum?: string | null;
     komparativ?: string | null;
     superlativ?: string | null;
@@ -31,12 +36,35 @@ const ARTIKEL_OPTIONS = ["der", "die", "das"];
 const PLURAL_SUFFIXES = ["-", "e", '"e', "er", '"er', "en", "n", "nen", "s"];
 const HILFSVERB_OPTIONS = ["haben", "sein"];
 
+function getVerbStem(inf: string): string {
+  if (inf.endsWith("eln")) return inf.slice(0, -3) + "l";
+  if (inf.endsWith("ern")) return inf.slice(0, -3) + "r";
+  if (inf.endsWith("en")) return inf.slice(0, -2);
+  if (inf.endsWith("n")) return inf.slice(0, -1);
+  return inf;
+}
+
+function computeRegularPraesens(inf: string) {
+  const s = getVerbStem(inf);
+  return {
+    ich: s + "e",
+    du: s + "st",
+    er: s + "t",
+    wir: inf,
+    ihr: s + "t",
+    sie: inf,
+  };
+}
+
 export function VokabelForm({ initial }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [wortart, setWortart] = useState<Wortart>(
     (initial?.wortart as Wortart) ?? "Substantiv"
   );
+
+  // Grundform (tracked for verb conjugation preview)
+  const [grundform, setGrundform] = useState(initial?.grundform ?? "");
 
   // Substantiv
   const [artikel, setArtikel] = useState(initial?.artikel ?? "der");
@@ -77,7 +105,12 @@ export function VokabelForm({ initial }: Props) {
           wortart === "Substantiv" ? computePluralForm(grundform, pSuffix) : undefined,
         partizip2: wortart === "Verb" ? (fd.get("partizip2") as string) || undefined : undefined,
         hilfsverb: wortart === "Verb" ? (fd.get("hilfsverb") as string) || undefined : undefined,
+        praesensIch: wortart === "Verb" ? (fd.get("praesensIch") as string) || undefined : undefined,
+        praesensDu: wortart === "Verb" ? (fd.get("praesensDu") as string) || undefined : undefined,
         praesensEr: wortart === "Verb" ? (fd.get("praesensEr") as string) || undefined : undefined,
+        praesensWir: wortart === "Verb" ? (fd.get("praesensWir") as string) || undefined : undefined,
+        praesensIhr: wortart === "Verb" ? (fd.get("praesensIhr") as string) || undefined : undefined,
+        praesensSie: wortart === "Verb" ? (fd.get("praesensSie") as string) || undefined : undefined,
         praeteritum: wortart === "Verb" ? (fd.get("praeteritum") as string) || undefined : undefined,
         komparativ:
           wortart === "Adjektiv" ? (fd.get("komparativ") as string) || undefined : undefined,
@@ -130,7 +163,8 @@ export function VokabelForm({ initial }: Props) {
         <input
           name="grundform"
           required
-          defaultValue={initial?.grundform ?? ""}
+          value={grundform}
+          onChange={(e) => setGrundform(e.target.value)}
           autoCorrect="off"
           autoCapitalize="none"
           spellCheck={false}
@@ -224,6 +258,7 @@ export function VokabelForm({ initial }: Props) {
       {/* Verb-specific fields */}
       {wortart === "Verb" && (
         <div className="space-y-3">
+          {/* Partizip II + Hilfsverb */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Partizip II</label>
@@ -250,35 +285,24 @@ export function VokabelForm({ initial }: Props) {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Präsens er/sie/es (unreg.)
-              </label>
-              <input
-                name="praesensEr"
-                defaultValue={initial?.praesensEr ?? ""}
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="z.B. sieht"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Präteritum (ich)
-              </label>
-              <input
-                name="praeteritum"
-                defaultValue={initial?.praeteritum ?? ""}
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="z.B. sah"
-              />
-            </div>
+
+          {/* Präsens conjugation table */}
+          <PraesensTable grundform={grundform} initial={initial} />
+
+          {/* Präteritum */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Präteritum (ich)
+            </label>
+            <input
+              name="praeteritum"
+              defaultValue={initial?.praeteritum ?? ""}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="z.B. sah"
+            />
           </div>
         </div>
       )}
@@ -369,5 +393,57 @@ export function VokabelForm({ initial }: Props) {
         </button>
       </div>
     </form>
+  );
+}
+
+interface PraesensTableProps {
+  grundform: string;
+  initial?: {
+    praesensIch?: string | null;
+    praesensDu?: string | null;
+    praesensEr?: string | null;
+    praesensWir?: string | null;
+    praesensIhr?: string | null;
+    praesensSie?: string | null;
+  } | null;
+}
+
+function PraesensTable({ grundform, initial }: PraesensTableProps) {
+  const reg = computeRegularPraesens(grundform || "");
+  const inputClass = "w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500";
+  const cells = [
+    { label: "ich", name: "praesensIch", placeholder: reg.ich, defaultValue: initial?.praesensIch ?? "" },
+    { label: "wir", name: "praesensWir", placeholder: reg.wir, defaultValue: initial?.praesensWir ?? "" },
+    { label: "du", name: "praesensDu", placeholder: reg.du, defaultValue: initial?.praesensDu ?? "" },
+    { label: "ihr", name: "praesensIhr", placeholder: reg.ihr, defaultValue: initial?.praesensIhr ?? "" },
+    { label: "er/sie/es", name: "praesensEr", placeholder: reg.er, defaultValue: initial?.praesensEr ?? "" },
+    { label: "sie/Sie", name: "praesensSie", placeholder: reg.sie, defaultValue: initial?.praesensSie ?? "" },
+  ];
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        Präsens{" "}
+        <span className="text-xs font-normal text-gray-400">
+          (leer lassen = regelmäßig)
+        </span>
+      </label>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 rounded-lg p-3 border border-gray-200">
+        {cells.map(({ label, name, placeholder, defaultValue }) => (
+          <div key={name} className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 w-16 shrink-0">{label}</span>
+            <input
+              name={name}
+              defaultValue={defaultValue}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder={placeholder}
+              className={inputClass}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
