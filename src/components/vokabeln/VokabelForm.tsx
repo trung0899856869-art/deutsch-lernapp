@@ -284,25 +284,50 @@ export function VokabelForm({ initial }: Props) {
                 </button>
               ))}
             </div>
-            {verbtyp !== "normal" && (
+            {verbtyp === "trennbar" && (
               <div className="mt-2">
                 <label className="block text-xs text-gray-500 mb-1">
-                  Präfix <span className="text-gray-400">(z.B. „an" für „anrufen")</span>
+                  Präfix <span className="text-gray-400">(z.B. „an" → „an|rufen", trennt sich beim Konjugieren)</span>
                 </label>
-                <input
-                  value={praefixVerb}
-                  onChange={(e) => setPraefixVerb(e.target.value)}
-                  autoCorrect="off"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  placeholder="z.B. an"
-                  className="w-32 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {praefixVerb && grundform && (
-                  <span className="ml-2 text-sm text-gray-500">
-                    → {praefixVerb}|{grundform.slice(praefixVerb.length)}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  <input
+                    value={praefixVerb}
+                    onChange={(e) => setPraefixVerb(e.target.value)}
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    placeholder="z.B. an"
+                    className="w-24 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  {praefixVerb && grundform && grundform.startsWith(praefixVerb) && (
+                    <span className="text-sm text-orange-600 font-medium">
+                      → {praefixVerb}|{grundform.slice(praefixVerb.length)}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Partizip II: <span className="font-medium">{praefixVerb && grundform ? `${praefixVerb}ge...` : "Präfix + ge + Stamm"}</span> (z.B. angerufen)</p>
+              </div>
+            )}
+            {verbtyp === "untrennbar" && (
+              <div className="mt-2">
+                <label className="block text-xs text-gray-500 mb-1">
+                  Präfix <span className="text-gray-400">(z.B. „ver" → „verstehen", bleibt immer beim Verb)</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={praefixVerb}
+                    onChange={(e) => setPraefixVerb(e.target.value)}
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    placeholder="z.B. ver"
+                    className="w-24 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  {praefixVerb && grundform && (
+                    <span className="text-sm text-purple-600 font-medium">{grundform}</span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Partizip II: <span className="font-medium">kein „ge-"</span> (z.B. verstanden, nicht <s>geversanden</s>)</p>
               </div>
             )}
           </div>
