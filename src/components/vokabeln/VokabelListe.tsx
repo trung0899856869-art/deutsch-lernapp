@@ -49,6 +49,9 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
   const [activeTab, setActiveTab]   = useState<"Alle" | Wortart>("Alle");
   const [view, setView]             = useState<ViewMode>("compact");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [page, setPage]             = useState(1);
+
+  const PAGE_SIZE = 50;
 
   const availableTabs = useMemo(() => {
     const found = new Set(vokabeln.map((v) => v.wortart as Wortart));
@@ -70,6 +73,16 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
     });
   }, [query, vokabeln, activeTab]);
 
+  const totalPages = Math.max(1, Math.ceil(gefiltert.length / PAGE_SIZE));
+
+  const paged = useMemo(
+    () => gefiltert.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [gefiltert, page, PAGE_SIZE]
+  );
+
+  // Reset to page 1 when filter changes
+  const setFilter = (fn: () => void) => { fn(); setPage(1); };
+
   const selectedVokabel = useMemo(
     () => vokabeln.find((v) => v.id === selectedId) ?? null,
     [vokabeln, selectedId]
@@ -84,7 +97,7 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
         {/* Wortart tabs */}
         <div className="flex gap-1.5 flex-wrap mb-4">
           <button
-            onClick={() => setActiveTab("Alle")}
+            onClick={() => setFilter(() => setActiveTab("Alle"))}
             className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
               activeTab === "Alle"
                 ? "border-gray-700 bg-gray-700 text-white"
@@ -96,7 +109,7 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
           {availableTabs.map((wortart) => (
             <button
               key={wortart}
-              onClick={() => setActiveTab(wortart)}
+              onClick={() => setFilter(() => setActiveTab(wortart))}
               className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
                 activeTab === wortart
                   ? TAB_COLORS[wortart] + " border-2"
@@ -115,7 +128,7 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => setFilter(() => setQuery(e.target.value))}
               placeholder="Wort oder Bedeutung suchen…"
               autoCorrect="off"
               autoCapitalize="none"
@@ -124,7 +137,7 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
             />
             {query && (
               <button
-                onClick={() => setQuery("")}
+                onClick={() => setFilter(() => setQuery(""))}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
               >×</button>
             )}
@@ -159,13 +172,13 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
           </div>
         ) : view === "card" ? (
           <div className="space-y-3">
-            {gefiltert.map((v) => <VokabelCard key={v.id} vokabel={v} />)}
+            {paged.map((v) => <VokabelCard key={v.id} vokabel={v} />)}
           </div>
         ) : view === "table" ? (
-          <TableView vokabeln={gefiltert} selectedId={selectedId} onSelect={setSelectedId} />
+          <TableView vokabeln={paged} selectedId={selectedId} onSelect={setSelectedId} />
         ) : (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100">
-            {gefiltert.map((v) => (
+            {paged.map((v) => (
               <CompactRow
                 key={v.id}
                 vokabel={v}
@@ -173,6 +186,32 @@ export function VokabelListe({ vokabeln }: { vokabeln: Vokabel[] }) {
                 onSelect={() => setSelectedId(v.id === selectedId ? null : v.id)}
               />
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 text-sm">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              ← Prev
+            </button>
+            <span className="text-gray-500 text-xs">
+              Seite {page} / {totalPages}
+              <span className="text-gray-400 ml-1">
+                ({(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, gefiltert.length)} von {gefiltert.length})
+              </span>
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              Next →
+            </button>
           </div>
         )}
       </div>
