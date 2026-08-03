@@ -1,9 +1,8 @@
 export const dynamic = "force-dynamic";
 import { getLesenTextById, getFragenByTextId, getWordFormIndex } from "@/lib/actions/lesen";
 import { notFound } from "next/navigation";
-import { HighlightedText } from "@/components/lesen/HighlightedText";
+import { LesenInteractiveArea } from "@/components/lesen/LesenInteractiveArea";
 import { FragenSektion } from "@/components/lesen/FragenSektion";
-import { WORTART_COLORS, WORTART_LIST } from "@/lib/constants";
 import Link from "next/link";
 import type { WordFormMatch } from "@/lib/text-highlighter";
 import type { Wortart } from "@/lib/constants";
@@ -55,20 +54,8 @@ export default async function LesenTextPage({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-4 text-xs">
-        {WORTART_LIST.map((w) => (
-          <span key={w} className="flex items-center gap-1">
-            <span className={`w-2 h-2 rounded-full ${WORTART_COLORS[w].dot}`} />
-            {w}
-          </span>
-        ))}
-      </div>
-
-      {/* Text with highlights */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm mb-6">
-        <HighlightedText text={text.inhalt} formRows={typedFormRows} />
-      </div>
+      {/* Interactive reading area — click any underlined word for full vocab detail */}
+      <LesenInteractiveArea text={text.inhalt} formRows={typedFormRows} />
 
       {/* Notes */}
       {text.notes && (

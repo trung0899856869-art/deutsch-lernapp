@@ -276,6 +276,11 @@ export async function getVokabelnStats() {
   return { total: rows.length, newCards, learning, mature, dueToday, dueThisWeek, byWortart, retentionRate };
 }
 
+export async function getVokabelById(id: string) {
+  const [row] = await db.select().from(vokabeln).where(eq(vokabeln.id, id));
+  return row ?? null;
+}
+
 export async function getWordFormIndexExcluding(excludeWortart: string) {
   const rows = await db
     .select({
